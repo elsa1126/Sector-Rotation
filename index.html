@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>板塊輪動儀表板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<meta name="theme-color" content="#0A0A0A">
+<style>
+/* 黑白交易終端：中性灰階為主，顏色只留給燈號；全站無襯線黑體，標題用粗體區分，數字用等寬數字 */
+:root{color-scheme:dark;
+ --bg:#0A0A0A;--card:#131313;--card2:#191919;--well:#0E0E0E;--line:#252525;--line2:#333333;
+ --fg:#EDEDED;--mut:#9B9B9B;--dim:#666666;
+ --acc:#EDEDED;--acc2:#FFFFFF;
+ --grn:#4CC38A;--red:#E5584D;--gry:#7A7A7A;--yel:#D9A441;
+ --sans:"Inter","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+*{box-sizing:border-box}
+::selection{background:rgba(255,255,255,.22)}
+html{background:var(--bg)}
+body{margin:0;min-height:100vh;color:var(--fg);font:15px/1.6 var(--sans);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;
+ background:radial-gradient(900px 520px at 88% -8%,rgba(255,255,255,.045),transparent 62%),var(--bg);background-attachment:fixed}
+/* 底片顆粒 */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.07;mix-blend-mode:overlay;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.w{max-width:1120px;margin:0 auto;padding:64px 24px 48px}
+
+/* 標頭 */
+.hd{margin-bottom:36px}
+.brand{font:600 11px/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+h1{font:700 36px/1.2 var(--sans);letter-spacing:.08em;margin:0}
+h1::after{content:"";display:block;width:44px;height:1px;background:var(--fg);opacity:.5;margin:18px 0 14px}
+h2{font:700 18px/1.4 var(--sans);letter-spacing:.02em;margin:0}
+h3{font:500 11.5px/1.4 var(--sans);letter-spacing:.14em;color:var(--mut);margin:0 0 8px}
+p.s{color:var(--mut);margin:0 0 14px;font-size:13px}
+.hd p.s{max-width:640px;margin:0}
+
+/* 卡片與元件 */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:16px}
+input,button,select,textarea{font:inherit;color:inherit}
+input[type=text],input[type=password],input[type=search],input[type=url],input[type=number],select,textarea{background:var(--well);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;width:100%;transition:border-color .15s}
+input:hover,select:hover,textarea:hover{border-color:#4a4a4a}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#8a8a8a}
+select{width:auto;max-width:100%}
+input[type=checkbox]{accent-color:var(--acc)}
+button{background:var(--acc);color:#0A0A0A;border:1px solid var(--acc);border-radius:8px;padding:10px 20px;cursor:pointer;font-size:13px;line-height:1.2;font-weight:600;letter-spacing:.02em;transition:background .15s,border-color .15s,color .15s}
+button:hover{background:var(--acc2);border-color:var(--acc2)}
+button.g{background:transparent;color:var(--fg);border-color:var(--line2);font-weight:400}
+button.g:hover{border-color:#8a8a8a;color:var(--acc2)}
+button.s{padding:6px 12px;font-size:11.5px}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* 頂端工具列：四個控制項一排、同尺寸 */
+.toolbar{display:grid;grid-template-columns:1fr 1fr 1fr 1.25fr;gap:8px;max-width:600px}
+.toolbar>*{width:100%;height:40px;padding:0 12px;white-space:nowrap}
+select.btnsel{-webkit-appearance:none;appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239B9B9B' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid var(--line2);border-radius:8px;color:var(--fg);font:400 13px/1.2 var(--sans);letter-spacing:.02em;text-align:center;text-align-last:center;padding:0 26px 0 12px;cursor:pointer;transition:border-color .15s}
+select.btnsel:hover{border-color:#8a8a8a}
+select.btnsel option{background:var(--card2);color:var(--fg)}
+.stamp{font-size:12.5px;color:var(--dim);margin:10px 0 16px;min-height:1em}
+label.f{display:block;font-size:12.5px;color:var(--mut);margin:10px 0 4px;letter-spacing:.04em}
+.hint{font-size:12px;color:var(--dim);margin:4px 0 0}
+details>summary{cursor:pointer}
+details>summary::marker{color:var(--dim)}
+
+/* 表格 */
+.sc{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+td{font:13.5px/1.5 var(--sans)}
+th:first-child,td:first-child,td.l,th.l{text-align:left}
+td.act{white-space:normal;text-align:left;min-width:260px;font-size:13px;line-height:1.6}
+th{color:var(--dim);font-weight:500;font-size:11.5px;letter-spacing:.1em}
+td.first b{font:700 17px/1.3 var(--sans);letter-spacing:.01em}
+button.th{background:none;border:0;padding:0;color:inherit;font:inherit;font-weight:inherit;letter-spacing:inherit;cursor:pointer}
+button.th:hover{color:var(--fg);background:none}
+
+/* 燈號 */
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);flex-shrink:0;
+ box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 16%,transparent),0 0 10px color-mix(in srgb,var(--c) 45%,transparent)}
+.sec{border-left:2px solid var(--c)}
+.sec h2{display:flex;align-items:center;gap:10px}
+.sec h2 .h2s{font:400 13px var(--sans);color:var(--mut);letter-spacing:.02em}
+summary h2{display:inline-flex !important}
+.pos{color:var(--grn)}.neg{color:var(--red)}
+.mut{color:var(--mut)}
+.nm{font-size:12px;color:var(--mut);font-weight:400;white-space:normal;max-width:260px;margin-top:2px}
+.tag{display:inline-block;font:500 10.5px/1.6 var(--sans);padding:0 6px;border-radius:4px;border:1px solid currentColor;margin-left:6px;vertical-align:1px;letter-spacing:.03em}
+.set td{padding:4px;font-family:var(--sans)}
+.set input{min-width:64px;padding:6px 8px}
+.set input[type=checkbox]{width:auto;min-width:0}
+pre{background:var(--well);border:1px solid var(--line);padding:12px;border-radius:8px;overflow-x:auto;font:12px/1.6 ui-monospace,Menlo,monospace}
+ol.steps{margin:10px 0;padding-left:20px;font-size:13.5px}
+ol.steps li{margin:4px 0}
+code{background:var(--well);padding:1px 5px;border-radius:4px;font:12px ui-monospace,Menlo,monospace}
+.hid{display:none}
+.err{color:var(--red);font-size:13px;margin:8px 0}
+.note{color:var(--yel);font-size:13px;margin:-4px 0 10px}
+.sum{display:flex;gap:22px;flex-wrap:wrap;margin:8px 2px 14px;align-items:baseline;font-size:13px}
+.sum b{font:700 22px var(--sans);margin-right:4px}
+
+/* 今日重點 */
+.focus{border-color:var(--line2);padding:22px 24px}
+.focus .mk{display:block}
+.focus .mk-t{display:flex;align-items:center;gap:10px;margin:8px 0 4px}
+.focus .lbl{font:600 12px var(--sans);letter-spacing:.12em;color:var(--dim)}
+.focus .mk b{font:700 24px/1.3 var(--sans);letter-spacing:.04em;color:var(--c)}
+.focus .mk .nums{font-size:12.5px;color:var(--mut)}
+.focus .mk p{margin:6px 0 0;font-size:13.5px;color:var(--fg);opacity:.85}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:16px}
+.fbox{background:transparent;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.pick{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.pick:first-of-type{border-top:0;padding-top:2px}
+.pick .big{font:700 20px/1.3 var(--sans);letter-spacing:.01em}
+.pick button.link.big{font:700 19px/1.3 var(--sans);letter-spacing:.02em}
+.pick .pt{display:flex;align-items:center;flex-wrap:wrap;gap:2px}
+.pick .sub{font-size:12.5px;color:var(--fg);opacity:.75;margin-top:1px}
+.pick .why{font-size:12.5px;color:var(--mut);margin-top:3px}
+.pick>button{flex-shrink:0;white-space:nowrap}
+button.link{background:none;border:0;padding:0;color:inherit;font:inherit;font-weight:600;cursor:pointer;text-align:left}
+button.link:hover{color:var(--acc2);background:none;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--dim)}
+
+/* 持倉總覽 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat .k{font-size:11.5px;color:var(--dim);letter-spacing:.12em}
+.stat .v{font:700 20px/1.4 var(--sans);margin-top:2px}
+.stat .d{font-size:12px;color:var(--mut)}
+
+/* 群組總覽 */
+.secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px;margin-top:12px}
+button.sc-card{display:block;width:100%;text-align:left;background:var(--well);color:var(--fg);font-weight:400;letter-spacing:0;border:1px solid var(--line);border-left:2px solid var(--c);border-radius:8px;padding:10px 12px}
+button.sc-card:hover{background:var(--well);color:var(--fg)}
+button.sc-card[aria-pressed=true]{outline:1px solid var(--fg);outline-offset:2px}
+.sc-card b{font:700 15px var(--sans)}
+.sc-card .m{font-size:12px;color:var(--mut)}
+.bar{height:4px;background:var(--line);border-radius:2px;position:relative;overflow:hidden;margin:9px 0 7px}
+.bar i{position:absolute;top:0;bottom:0;background:var(--c);box-shadow:0 0 8px var(--c)}
+.bar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--dim)}
+
+/* 篩選列、紀錄、對話框 */
+.filt{padding:12px 14px}
+.filt input[type=search]{flex:1;min-width:180px;width:auto}
+.filt label{font-size:13.5px;display:flex;gap:6px;align-items:center;color:var(--mut)}
+.log{list-style:none;padding:0;margin:8px 0 0;font-size:13px}
+.log li{padding:6px 0;border-bottom:1px solid var(--line)}
+dialog{background:var(--card2);color:var(--fg);border:1px solid var(--line2);border-radius:12px;padding:20px;width:min(420px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
+
+/* 頁尾落款 */
+.ft{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-top:28px;padding-top:14px;border-top:1px solid var(--line)}
+.ft p.s{margin:0;max-width:720px}
+
+@media(max-width:640px){
+ .w{padding:44px 16px 32px}
+ .toolbar>*{padding:0 6px;font-size:12.5px}
+ select.btnsel{padding:0 18px 0 6px;background-position:right 7px center;font-size:12.5px}
+ .hd{margin-bottom:28px}
+ h1{font-size:30px}
+ .brand{letter-spacing:.26em}
+ .focus{padding:16px}
+ .focus .mk b{font-size:21px}
+ #out table{min-width:0}
+ #out tr.h{display:none}
+ #out tr{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;padding:12px 0;border-bottom:1px solid var(--line)}
+ #out td{display:flex;justify-content:space-between;gap:8px;border:0;padding:2px 0;white-space:normal;text-align:right}
+ #out td::before{content:attr(data-l);color:var(--dim);font:12px var(--sans);text-align:left}
+ #out td.first{grid-column:1/-1;display:block;padding-bottom:4px;text-align:left}
+ #out td.first b{font-size:19px}
+ #out td.first::before,#out td.act::before{content:none}
+ #out td.act{grid-column:1/-1;display:block;min-width:0;padding-top:6px;text-align:left}
+ .nm{max-width:none}
+}
+</style>
+</head>
+<body>
+<div class="w">
+<header class="hd">
+  <div class="brand">Sector Rotation</div>
+  <h1>板塊輪動</h1>
+  <p class="s">獲利了結、保留淨利幣、把利潤滾到落後標的。報價來自 CoinMarketCap，CoinGecko 備援。</p>
+</header>
+
+<!-- 連線設定 -->
+<div id="auth" class="card hid">
+  <h2>連線設定</h2>
+  <label class="f" for="wk">Cloudflare Worker 網址</label>
+  <input type="url" id="wk" placeholder="https://cmc-proxy.你的帳號.workers.dev">
+  <label class="f" for="ak">CoinMarketCap API Key（選填）</label>
+  <input type="password" id="ak" autocomplete="off" placeholder="Worker 已設 Secret 就留空">
+  <label class="f" for="gk">CoinGecko API Key（選填）</label>
+  <input type="password" id="gk" autocomplete="off" placeholder="Worker 已設 Secret 就留空">
+  <div class="row" style="margin-top:12px">
+    <button id="save">儲存並進入</button>
+    <button class="g" id="demo">先用示範資料看看</button>
+  </div>
+  <p class="s" style="margin-top:10px">金鑰兩種放法擇一：<b>填在這裡</b>，會以明文存在這台裝置的瀏覽器，隨請求送到你的 Worker（共用電腦請用完按「連線設定」清掉）；或<b>存成 Worker Secret</b>（見下方步驟），這兩格留空，換裝置也不用再填。</p>
+  <details>
+    <summary>Worker 設定步驟與程式碼</summary>
+    <ol class="steps">
+      <li>Cloudflare 後台 → Workers &amp; Pages → 你的 Worker → <b>Edit code</b>，把下方程式碼整段貼上，並把 <code>ALLOW</code> 改成你的 GitHub Pages 網域（只要 <code>https://帳號.github.io</code>，不含路徑）。</li>
+      <li>回到 Worker → <b>Settings</b> → <b>Variables and Secrets</b> → Add，類型選 <b>Secret</b>：名稱 <code>CMC_KEY</code> 填 CoinMarketCap 金鑰；再新增 <code>CG_KEY</code> 填 CoinGecko 金鑰。</li>
+      <li>按 <b>Deploy</b>。之後網頁只要填 Worker 網址就能用，換電腦也一樣。</li>
+    </ol>
+<pre id="wcode">// 金鑰優先用 Worker 的 Secret：CMC_KEY、CG_KEY（Settings → Variables and Secrets）；沒設就用網頁送來的金鑰
+const ALLOW = ["https://你的帳號.github.io"]; // 改成你的 GitHub Pages 網域（不含路徑）
+const ROUTES = {
+  "/v2/cryptocurrency/quotes/latest": (env, h) => ["https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest", { "X-CMC_PRO_API_KEY": env.CMC_KEY || h.get("X-CMC_PRO_API_KEY") || "" }],
+  "/cg/coins/markets": (env, h) => ["https://api.coingecko.com/api/v3/coins/markets", { "x-cg-demo-api-key": env.CG_KEY || h.get("x-cg-demo-api-key") || "" }]
+};
+export default {
+  async fetch(req, env) {
+    const o = req.headers.get("Origin") || "";
+    const cors = { "Access-Control-Allow-Origin": ALLOW.includes(o) ? o : ALLOW[0], "Access-Control-Allow-Methods": "GET, OPTIONS", "Access-Control-Allow-Headers": "X-CMC_PRO_API_KEY, x-cg-demo-api-key", "Vary": "Origin" };
+    if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+    if (req.method !== "GET" || !ALLOW.includes(o)) return new Response("forbidden", { status: 403, headers: cors });
+    const u = new URL(req.url), route = ROUTES[u.pathname];
+    if (!route) return new Response("not allowed", { status: 404, headers: cors });
+    const [target, auth] = route(env, req.headers);
+    const r = await fetch(target + u.search, { headers: { ...auth, "Accept": "application/json" } });
+    return new Response(r.body, { status: r.status, headers: { ...cors, "Content-Type": "application/json" } });
+  }
+};</pre>
+    <button class="g" id="cp">複製程式碼</button>
+  </details>
+</div>
+
+<!-- 主畫面 -->
+<div id="main" class="hid">
+  <div class="toolbar">
+    <button id="refresh">重新整理</button>
+    <button class="g" id="tset">策略設定</button>
+    <button class="g" id="conn">連線設定</button>
+    <select id="auto" class="btnsel" aria-label="自動更新頻率" title="自動更新頻率。CMC 每次查詢約 2 credits；免費方案每月 10,000"><option value="0">自動：關</option><option value="15">自動：15分</option><option value="30">自動：30分</option><option value="60">自動：60分</option></select>
+  </div>
+  <p class="stamp" id="stamp"></p>
+
+  <div id="set" class="card hid">
+    <h2>策略參數</h2>
+    <div class="row" style="align-items:flex-start">
+      <div style="flex:1;min-width:170px"><label class="f" for="p1">FDV 達龍頭 % 時停利</label><input type="number" step="any" id="p1"><p class="hint">小幣估值追到龍頭這個比例，就算過熱</p></div>
+      <div style="flex:1;min-width:170px"><label class="f" for="p2">7 日領先中位數幾點算過熱</label><input type="number" step="any" id="p2"><p class="hint">幣跟整份名單比；群組跟各群組中位比</p></div>
+      <div style="flex:1;min-width:170px"><label class="f" for="p3">7 日漲幅絕對上限 %</label><input type="number" step="any" id="p3"><p class="hint">不管別人漲多少，超過就算過熱</p></div>
+      <div style="flex:1;min-width:170px"><label class="f" for="p4">換手率下限 %</label><input type="number" step="any" id="p4"><p class="hint">24H 量 ÷ 市值，低於即觀望</p></div>
+      <div style="flex:1;min-width:170px"><label class="f" for="p5">24H 量下限（USD）</label><input type="number" step="any" id="p5"><p class="hint">量太小容易被滑價吃掉</p></div>
+      <div style="flex:1;min-width:170px"><label class="f" for="p6">群組資金流入門檻 %</label><input type="number" step="any" id="p6"><p class="hint">群組 24H 量比前一天多出這麼多，才算有資金進來</p></div>
+      <div style="flex:1;min-width:170px"><label class="f" for="target">預設目標倉位（USD）</label><input type="number" step="any" min="0" id="target"><p class="hint">個別沒設定時使用；0 表示不算加碼金額</p></div>
+      <div style="flex:1;min-width:170px"><label class="f" for="pool">利潤池（USD）</label><input type="number" step="any" id="pool"><p class="hint">記錄交易會自動增減，也可在這裡手動校正</p></div>
+    </div>
+
+    <h2 style="margin-top:16px">群組與龍頭</h2>
+    <p class="s">龍頭用來比 FDV（小幣估值追到龍頭的幾 %）。龍頭可以不在名單裡（例如 BNB、TON、TAO 會自動抓報價）；留空則該群組不比 FDV。</p>
+    <div class="sc"><table class="set" id="gtab" style="min-width:420px"></table></div>
+
+    <h2 style="margin-top:16px">觀察名單</h2>
+    <p class="s">群組決定輪動比較的板塊，標籤用來篩選（多個用逗號分隔）。CMC ID 用來精準查價、避免同代號撞名；新增的幣留空會改用代號查。數量、成本價、目標倉位選填。</p>
+    <input type="search" id="sf" placeholder="在名單裡找代號、群組或標籤" aria-label="篩選名單" style="margin-bottom:8px">
+    <div class="sc"><table class="set" id="rows"></table></div>
+    <datalist id="glist"></datalist>
+    <div class="row" style="margin-top:10px"><button class="g" id="add">新增一列</button><button id="apply">儲存並重算</button><button class="g" id="reset">恢復內建名單</button></div>
+
+    <h2 style="margin-top:16px">文字匯入 / 匯出</h2>
+    <p class="s">支援 CSV 或 JSON。CSV 欄位順序：代號,群組,龍頭,數量,成本價,淨利幣,目標倉位,標籤,CMC ID,CoinGecko ID,名稱（只有代號必填，可含標題列；標籤之間用 | 分隔）。JSON 匯出是完整備份（名單、群組、參數、利潤池與交易紀錄），用「取代名單」匯入即可還原。</p>
+    <textarea id="imp" rows="7" style="font-size:12.5px;line-height:1.6" placeholder="RENDER,AI,TAO&#10;WLD,AI,TAO,100,2.5&#10;或 JSON：[{&quot;sym&quot;:&quot;SOL&quot;,&quot;sector&quot;:&quot;主流公鏈&quot;}]"></textarea>
+    <div class="row" style="margin-top:8px"><button id="impAdd">加入名單</button><button class="g" id="impRep">取代名單</button><button class="g" id="expCsv">匯出 CSV</button><button class="g" id="expJson">匯出 JSON 備份</button></div>
+    <div id="impMsg" class="s" style="margin-top:6px"></div>
+    <div class="row" style="margin-top:16px;border-top:1px solid var(--line);padding-top:12px"><button class="g" id="wipe">清除這台裝置的所有資料</button><span class="hint">名單、持倉、利潤池與交易紀錄都會刪除，建議先匯出 JSON 備份</span></div>
+  </div>
+
+  <div id="err" class="err"></div>
+  <div id="note" class="note"></div>
+  <div id="focus"></div>
+  <div id="stats"></div>
+  <div id="secs"></div>
+  <div class="card filt row" id="filt">
+    <input type="search" id="fq" placeholder="搜尋代號、名稱或標籤" aria-label="搜尋">
+    <select id="fg" aria-label="群組"></select>
+    <select id="ft" aria-label="標籤"></select>
+    <label><input type="checkbox" id="fh"> 只看有持倉</label>
+    <button class="g s" id="fclr">清除篩選</button>
+  </div>
+  <div class="sum" id="sum"></div>
+  <div id="out"></div>
+</div>
+<footer class="ft">
+  <p class="s">此工具提供的是規則化的提示，不是投資建議。群組量能來自 CoinMarketCap 的 24H 成交量變化（CoinGecko 補上的幣沒有這項，不計入）；換手率基準來自你的觀察名單。</p>
+</footer>
+</div>
+
+<!-- 記錄交易 -->
+<dialog id="dlg" aria-labelledby="dt">
+  <form method="dialog">
+    <h2 id="dt">記錄交易：<span id="dsym"></span></h2>
+    <label class="f" for="dside">動作</label>
+    <select id="dside"><option value="sell">賣出</option><option value="buy">買入</option></select>
+    <label class="f" for="dq">數量</label>
+    <input type="number" step="any" min="0" id="dq">
+    <label class="f" for="dp">成交價（USD）</label>
+    <input type="number" step="any" min="0" id="dp">
+    <p id="dprev" class="s" style="margin-top:10px"></p>
+    <div class="row"><button value="ok" id="dok">確認記錄</button><button class="g" value="cancel" formnovalidate>取消</button></div>
+  </form>
+</dialog>
+
+<script>
+const $=id=>document.getElementById(id);
+
+// ---------- 內建名單 ----------
+// [代號, 名稱, CMC ID, CoinGecko ID, 群組, 標籤（| 分隔）]；ID 已逐一核對價格與名稱，避免同代號撞名
+const LIST_VER=2;
+const LIST=[
+ ["ETH","Ethereum",1027,"ethereum","主流公鏈",""],
+ ["SOL","Solana",5426,"solana","主流公鏈","Solana"],
+ ["TRX","TRON",1958,"tron","主流公鏈","Tron"],
+ ["ADA","Cardano",2010,"cardano","主流公鏈",""],
+ ["NEAR","NEAR Protocol",6535,"near","主流公鏈",""],
+ ["SUI","Sui",20947,"sui","主流公鏈",""],
+ ["AVAX","Avalanche",5805,"avalanche-2","主流公鏈",""],
+ ["HBAR","Hedera",4642,"hedera-hashgraph","主流公鏈",""],
+ ["DOT","Polkadot",6636,"polkadot","主流公鏈","Polkadot"],
+ ["ICP","Internet Computer",8916,"internet-computer","主流公鏈",""],
+ ["ALGO","Algorand",4030,"algorand","主流公鏈",""],
+ ["APT","Aptos",21794,"aptos","主流公鏈",""],
+ ["SEI","Sei",23149,"sei-network","主流公鏈",""],
+ ["PI","Pi",35697,"pi-network","老牌公鏈",""],
+ ["FLR","Flare",7950,"flare-networks","老牌公鏈",""],
+ ["CFX","Conflux",7334,"conflux-token","老牌公鏈",""],
+ ["IOTA","IOTA",1720,"iota","老牌公鏈","DePIN"],
+ ["A","Vaulta",36462,"vaulta","老牌公鏈",""],
+ ["KAVA","Kava",4846,"kava","老牌公鏈","Cosmos"],
+ ["ZIL","Zilliqa",2469,"zilliqa","老牌公鏈",""],
+ ["VTHO","VeThor Token",3012,"vethor-token","老牌公鏈",""],
+ ["CKB","Nervos Network",4948,"nervos-network","老牌公鏈",""],
+ ["CSPR","Casper",5899,"casper-network","老牌公鏈",""],
+ ["IOST","IOST",2405,"iostoken","老牌公鏈",""],
+ ["ONE","Harmony",3945,"harmony","老牌公鏈",""],
+ ["CHR","Chromia",3978,"chromaway","老牌公鏈",""],
+ ["QKC","QuarkChain",2840,"quark-chain","老牌公鏈",""],
+ ["POL","Polygon",28321,"polygon-ecosystem-token","L2 / 擴容",""],
+ ["STX","Stacks",4847,"blockstack","L2 / 擴容","BTC 生態"],
+ ["STRK","Starknet",22691,"starknet","L2 / 擴容",""],
+ ["OP","Optimism",11840,"optimism","L2 / 擴容",""],
+ ["ALT","Altlayer",29073,"altlayer","L2 / 擴容",""],
+ ["SKL","SKALE",5691,"skale","L2 / 擴容",""],
+ ["CTSI","Cartesi",5444,"cartesi","L2 / 擴容",""],
+ ["LRC","Loopring",1934,"loopring","L2 / 擴容",""],
+ ["ZEC","Zcash",1437,"zcash","PoW / 隱私","隱私"],
+ ["LTC","Litecoin",2,"litecoin","PoW / 隱私",""],
+ ["XEC","eCash",10791,"ecash","PoW / 隱私",""],
+ ["DGB","DigiByte",109,"digibyte","PoW / 隱私",""],
+ ["XVG","Verge",693,"verge","PoW / 隱私",""],
+ ["XRP","XRP",52,"ripple","支付 / RWA",""],
+ ["ZBCN","Zebec Network",30636,"zebec-network","支付 / RWA","Solana|RWA"],
+ ["RSR","Reserve Rights",3964,"reserve-rights-token","支付 / RWA","RWA|穩定幣"],
+ ["ACH","Alchemy Pay",6958,"alchemy-pay","支付 / RWA",""],
+ ["DUSK","Dusk",4092,"dusk-network","支付 / RWA","隱私|RWA"],
+ ["COTI","COTI",3992,"coti","支付 / RWA",""],
+ ["MANTRA","MANTRA",39611,"mantra","支付 / RWA","RWA"],
+ ["UNI","Uniswap",7083,"uniswap","DeFi",""],
+ ["ENA","Ethena",30171,"ethena","DeFi","穩定幣"],
+ ["CAKE","PancakeSwap",7186,"pancakeswap-token","DeFi","BNB 鏈"],
+ ["RUNE","THORChain",4157,"thorchain","DeFi","Cosmos|跨鏈"],
+ ["1INCH","1inch",8104,"1inch","DeFi",""],
+ ["SUSHI","SushiSwap",6758,"sushi","DeFi",""],
+ ["XVS","Venus",7288,"venus","DeFi","BNB 鏈"],
+ ["KNC","Kyber Network Crystal v2",9444,"kyber-network-crystal","DeFi",""],
+ ["SPELL","Spell Token",11289,"spell-token","DeFi",""],
+ ["DODO","DODO",7224,"dodo","DeFi",""],
+ ["JOE","JOE",11396,"joe","DeFi",""],
+ ["MAV","Maverick Protocol",18037,"maverick-protocol","DeFi",""],
+ ["BEL","Bella Protocol",6928,"bella-protocol","DeFi",""],
+ ["HFT","Hashflow",22461,"hashflow","DeFi",""],
+ ["IDEX","IDEX",3928,"aurora-dao","DeFi",""],
+ ["HYPE","Hyperliquid",32196,"hyperliquid","Perp DEX","Perp"],
+ ["ASTER","Aster",36341,"aster-2","Perp DEX","BNB 鏈|Perp"],
+ ["AEVO","Aevo",29676,"aevo-exchange","Perp DEX","Perp"],
+ ["CRO","Cronos",3635,"crypto-com-chain","平台幣 / Launchpad","交易所幣"],
+ ["PUMP","Pump.fun",36507,"pump-fun","平台幣 / Launchpad","Solana|Launchpad"],
+ ["HTX","HTX",29160,"htx-dao","平台幣 / Launchpad","Tron|交易所幣"],
+ ["GT","GateToken",4269,"gatechain-token","平台幣 / Launchpad","交易所幣"],
+ ["SFP","SafePal",8119,"safepal","平台幣 / Launchpad","BNB 鏈"],
+ ["FORM","Four",23635,"four","平台幣 / Launchpad","BNB 鏈|Launchpad"],
+ ["FTT","FTX Token",4195,"ftx-token","平台幣 / Launchpad","交易所幣|高風險"],
+ ["WOO","WOO",7501,"woo-network","平台幣 / Launchpad","交易所幣"],
+ ["C98","Coin98",10903,"coin98","平台幣 / Launchpad","BNB 鏈"],
+ ["TKO","Toko Token",9020,"tokocrypto","平台幣 / Launchpad","BNB 鏈|交易所幣"],
+ ["DOGE","Dogecoin",74,"dogecoin","Meme",""],
+ ["SHIB","Shiba Inu",5994,"shiba-inu","Meme",""],
+ ["PEPE","Pepe",24478,"pepe","Meme",""],
+ ["PENGU","Pudgy Penguins",34466,"pudgy-penguins","Meme","Solana|NFT"],
+ ["TRUMP","OFFICIAL TRUMP",35336,"official-trump","Meme","Solana|政治"],
+ ["BONK","Bonk",23095,"bonk","Meme","Solana"],
+ ["FLOKI","FLOKI",10804,"floki","Meme",""],
+ ["TURBO","Turbo",24911,"turbo","Meme",""],
+ ["BABYDOGE","Baby Doge Coin",10407,"baby-doge-coin","Meme","BNB 鏈"],
+ ["BOME","BOOK OF MEME",29870,"book-of-meme","Meme","Solana"],
+ ["BAN","Comedian",33881,"comedian","Meme","Solana"],
+ ["PNUT","Peanut the Squirrel",33788,"peanut-the-squirrel","Meme","Solana"],
+ ["PEOPLE","ConstitutionDAO",14806,"constitutiondao","Meme","政治"],
+ ["NEIRO","Neiro",32521,"neiro-3","Meme",""],
+ ["MEME","Memecoin",28301,"memecoin-2","Meme",""],
+ ["SATS","SATS (Ordinals)",28194,"sats-ordinals","Meme","BTC 生態"],
+ ["WEN","Wen",29175,"wen-4","Meme","Solana"],
+ ["RATS","rats (Ordinals)",28452,"rats","Meme","BTC 生態"],
+ ["NOT","Notcoin",28850,"notcoin","TON 生態","TON|Tap-to-earn"],
+ ["DOGS","DOGS",32698,"dogs-2","TON 生態","TON|Tap-to-earn"],
+ ["HMSTR","Hamster Kombat",32195,"hamster-kombat","TON 生態","TON|Tap-to-earn"],
+ ["WLD","Worldcoin",13502,"worldcoin-wld","AI","AI"],
+ ["FET","Artificial Superintelligence Alliance",3773,"fetch-ai","AI","AI"],
+ ["NFT","AINFT",9816,"apenft","AI","Tron|AI"],
+ ["AWE","AWE",4006,"stp-network","AI","AI"],
+ ["IO","io.net",29835,"io","AI","Solana|AI|DePIN"],
+ ["PHA","Phala Network",6841,"pha","AI","Polkadot|AI|隱私"],
+ ["AI","Gensyn",39883,"gensyn","AI","AI"],
+ ["IQ","IQ",2930,"everipedia","AI","AI"],
+ ["GOAT","Goatseus Maximus",33440,"goatseus-maximus","AI","Solana|AI|AI Meme"],
+ ["ARPA","ARPA",4039,"arpa","AI","AI"],
+ ["ACT","Act I : The AI Prophecy",33566,"act-i-the-ai-prophecy","AI","Solana|AI|AI Meme"],
+ ["IMX","Immutable",10603,"immutable-x","GameFi / NFT",""],
+ ["AXS","Axie Infinity",6783,"axie-infinity","GameFi / NFT",""],
+ ["MANA","Decentraland",1966,"decentraland","GameFi / NFT",""],
+ ["SAND","The Sandbox",6210,"the-sandbox","GameFi / NFT",""],
+ ["APE","ApeCoin",18876,"apecoin","GameFi / NFT","NFT"],
+ ["GALA","Gala",7080,"gala","GameFi / NFT",""],
+ ["ENJ","Enjin Coin",2130,"enjincoin","GameFi / NFT",""],
+ ["BLUR","Blur",23121,"blur","GameFi / NFT","NFT"],
+ ["WAXP","WAX",2300,"wax","GameFi / NFT",""],
+ ["GMT","GMT",18069,"stepn","GameFi / NFT",""],
+ ["YGG","Yield Guild Games",10688,"yield-guild-games","GameFi / NFT",""],
+ ["PIXEL","Pixels",29335,"pixels","GameFi / NFT",""],
+ ["XAI","Xai",28933,"xai-blockchain","GameFi / NFT",""],
+ ["PORTAL","Portal",29555,"portal-2","GameFi / NFT",""],
+ ["RARE","SuperRare",11294,"superrare","GameFi / NFT","NFT"],
+ ["TLM","Alien Worlds",9119,"alien-worlds","GameFi / NFT",""],
+ ["MBOX","MOBOX",9175,"mobox","GameFi / NFT",""],
+ ["LINK","Chainlink",1975,"chainlink","基礎設施 / DePIN",""],
+ ["PYTH","Pyth Network",28177,"pyth-network","基礎設施 / DePIN","Solana"],
+ ["GRT","The Graph",6719,"the-graph","基礎設施 / DePIN",""],
+ ["ENS","Ethereum Name Service",13855,"ethereum-name-service","基礎設施 / DePIN",""],
+ ["JASMY","JasmyCoin",8425,"jasmycoin","基礎設施 / DePIN","DePIN"],
+ ["THETA","Theta Network",2416,"theta-token","基礎設施 / DePIN","DePIN"],
+ ["W","Wormhole",29587,"wormhole","基礎設施 / DePIN","Solana|跨鏈"],
+ ["TFUEL","Theta Fuel",3822,"theta-fuel","基礎設施 / DePIN","DePIN"],
+ ["ID","SPACE ID",21846,"space-id","基礎設施 / DePIN","BNB 鏈"],
+ ["CVC","Civic",1816,"civic","基礎設施 / DePIN",""],
+ ["CELR","Celer Network",3814,"celer-network","基礎設施 / DePIN","跨鏈"],
+ ["POND","Marlin",7497,"marlin","基礎設施 / DePIN",""],
+ ["NKN","NKN",2780,"nkn","基礎設施 / DePIN","DePIN"],
+ ["LUNC","Terra Classic",4172,"terra-luna","粉絲 / 其他","高風險"],
+ ["CHZ","Chiliz",4066,"chiliz","粉絲 / 其他",""],
+ ["WIN","WINkLink",4206,"wink","粉絲 / 其他","Tron"],
+ ["EDU","Open Campus",24613,"edu-coin","粉絲 / 其他",""],
+ ["PSG","Paris Saint-Germain Fan Token",5226,"paris-saint-germain-fan-token","粉絲 / 其他",""],
+ ["COS","Contentos",4036,"contentos","粉絲 / 其他",""]
+];
+const GROUPS={"主流公鏈": "ETH", "老牌公鏈": "ADA", "L2 / 擴容": "", "PoW / 隱私": "ZEC", "支付 / RWA": "XRP", "DeFi": "UNI", "Perp DEX": "HYPE", "平台幣 / Launchpad": "BNB", "Meme": "DOGE", "TON 生態": "TON", "AI": "TAO", "GameFi / NFT": "", "基礎設施 / DePIN": "LINK", "粉絲 / 其他": ""}; // 群組 → 龍頭
+const EXTRA={BTC:[1,"bitcoin"],BNB:[1839,"binancecoin"],TON:[11419,"the-open-network"],TAO:[22974,"bittensor"]}; // 不在名單裡的龍頭與大盤基準
+
+// ---------- 儲存 ----------
+const K="csr_cfg",QK="csr_quotes",LK="csr_last";
+const ls={
+ get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+ set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
+ del(k){try{localStorage.removeItem(k)}catch(e){}}
+};
+["csr_snap","csr_snap2"].forEach(k=>ls.del(k));
+
+const ROW={sym:"",name:"",id:"",cg:"",sector:"",tags:"",leader:"",qty:"",cost:"",target:"",free:false};
+const defRows=()=>LIST.map(([sym,name,id,cg,sector,tags])=>({...ROW,sym,name,id:String(id),cg,sector,tags:tags.split("|").filter(Boolean).join(", ")}));
+const DEF={worker:"",key:"",cgKey:"",demo:false,p1:25,p2:25,p3:60,p4:3,p5:5000000,p6:10,target:0,pool:0,auto:0,log:[],
+ listVer:LIST_VER,groups:{...GROUPS},ui:{q:"",group:"",tag:"",held:false},rows:defRows()};
+const PK=["p1","p2","p3","p4","p5","p6","target","pool"];
+const fresh=()=>JSON.parse(JSON.stringify(DEF));
+const keepHold=(rows,old)=>{const m=Object.fromEntries(old.map(r=>[r.sym,r]));return rows.map(r=>{const o=m[r.sym];return o?{...r,qty:o.qty||"",cost:o.cost||"",target:o.target||"",free:!!o.free}:r})};
+function load(){
+ const saved=ls.get(K,{}),c=Object.assign(fresh(),saved);
+ if(Object.keys(saved).length&&saved.listVer!==LIST_VER)c.listVer=0; // 舊版存檔沒有 listVer，要觸發名單升級
+ c.rows=(Array.isArray(c.rows)?c.rows:defRows()).map(r=>({...ROW,...r}));
+ c.log=Array.isArray(c.log)?c.log:[];
+ c.groups={...GROUPS,...(c.groups||{})};
+ c.ui={...DEF.ui,...(c.ui||{})};
+ if(c.listVer!==LIST_VER){c.rows=keepHold(defRows(),c.rows);c.groups={...GROUPS};c.listVer=LIST_VER}
+ return c;
+}
+const save=()=>ls.set(K,cfg);
+
+// ---------- 格式 ----------
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=>{const n=parseFloat(v);return isFinite(n)?n:0};
+const ok=n=>n!=null&&isFinite(n);
+const sum=a=>a.reduce((x,y)=>x+y,0);
+const med=a=>{a=a.filter(ok).sort((x,y)=>x-y);if(!a.length)return 0;const m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2};
+const usd=n=>!ok(n)?"-":n<0?"-"+usd(-n):n>=1e9?"$"+(n/1e9).toFixed(2)+"B":n>=1e6?"$"+(n/1e6).toFixed(1)+"M":n>=1e3?"$"+Math.round(n).toLocaleString("en-US"):"$"+n.toFixed(2);
+const px=n=>!ok(n)?"-":n>=1?"$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):"$"+n.toPrecision(3);
+const fq=n=>Number((+n).toPrecision(4)).toLocaleString("en-US",{maximumFractionDigits:10});
+const sg=(n,d=1)=>!ok(n)?"-":(n>=0?"+":"")+n.toFixed(d);
+const pc=n=>!ok(n)?"-":`<span class="${n>=0?"pos":"neg"}">${sg(n)}%</span>`;
+const ago=t=>{const h=(Date.now()-t)/3600e3;return h<1?"不到 1 小時前":h<48?Math.floor(h)+" 小時前":Math.floor(h/24)+" 天前"};
+const tagList=r=>String(r.tags||"").split(/[,，|]/).map(s=>s.trim()).filter(Boolean);
+const ST={red:"過熱",grn:"窪地",gry:"觀望"};
+const COLR={red:"var(--red)",grn:"var(--grn)",gry:"var(--gry)"};
+const SYM_RE=/^[A-Z0-9.$_-]+$/;
+
+// ---------- 狀態 ----------
+let cfg=load(),Q=null,Qt=0,busy=false,timer=null,items=[],sortBy={k:"c7",dir:-1},T=null,grayOpen=false;
+save();
+const setOpen=()=>!$("set").classList.contains("hid");
+const groupOf=r=>r.sector||"未分類";
+const leaderOf=r=>r.leader||cfg.groups[groupOf(r)]||"";
+
+function view(){
+ const in_=cfg.demo||cfg.worker;
+ $("auth").classList.toggle("hid",!!in_);$("main").classList.toggle("hid",!in_);
+ if(!in_){clearInterval(timer);return}
+ if(!Q&&!cfg.demo){const c=ls.get(QK,null);if(c&&c.Q){Q=c.Q;Qt=c.t;render();$("stamp").textContent="上次資料・"+new Date(Qt).toLocaleString()}}
+ setAuto();run();
+}
+function setAuto(){
+ clearInterval(timer);
+ if(cfg.auto>0)timer=setInterval(()=>{if(!document.hidden)run()},cfg.auto*60e3);
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&cfg.auto>0&&Date.now()-Qt>cfg.auto*60e3&&!$("main").classList.contains("hid"))run()});
+
+// ---------- 按鈕 ----------
+$("save").onclick=()=>{
+ const w=$("wk").value.trim().replace(/\/+$/,"");
+ if(!/^https:\/\//.test(w))return alert("請填入 https:// 開頭的 Worker 網址");
+ cfg.worker=w;cfg.key=$("ak").value.trim();cfg.cgKey=$("gk").value.trim();cfg.demo=false;Q=null;ls.del(QK);save();view();
+};
+$("demo").onclick=()=>{cfg.demo=true;Q=null;save();view()};
+$("conn").onclick=()=>{cfg.demo=false;$("wk").value=cfg.worker;$("ak").value=cfg.key;$("gk").value=cfg.cgKey;cfg.worker="";Q=null;save();view()};
+$("cp").onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText($("wcode").textContent).then(()=>$("cp").textContent="已複製")};
+$("refresh").onclick=run;
+$("auto").onchange=()=>{cfg.auto=+$("auto").value;save();setAuto()};
+$("tset").onclick=()=>{$("set").classList.toggle("hid");if(setOpen())fillSet()};
+$("add").onclick=()=>{readSet(false);cfg.rows.push({...ROW});fillSet();$("sf").value="";const ins=$("rows").querySelectorAll("input[data-k=sym]");ins[ins.length-1].focus()};
+$("apply").onclick=()=>{readSet();save();fillSet();render();run()};
+$("reset").onclick=()=>{
+ if(!confirm("把觀察名單與群組恢復成內建的 143 檔？同代號的數量、成本與目標倉位會保留。"))return;
+ readSet();cfg.rows=keepHold(defRows(),cfg.rows);cfg.groups={...GROUPS};save();fillSet();render();run();
+};
+$("wipe").onclick=()=>{
+ if(!confirm("確定清除這台裝置的所有資料？此動作無法復原。"))return;
+ [K,QK,LK,LK+"_demo"].forEach(k=>ls.del(k));location.reload();
+};
+
+// ---------- 設定表單 ----------
+const COLS=[["sym","代號","text"],["sector","群組","text"],["tags","標籤","text"],["id","CMC ID","text"],["qty","數量","number"],["cost","成本價","number"],["target","目標倉位","number"]];
+function fillSet(){
+ PK.forEach(k=>$(k).value=cfg[k]);
+ const groups=[...new Set(cfg.rows.map(groupOf))];
+ $("glist").innerHTML=groups.map(g=>`<option value="${esc(g)}">`).join("");
+ $("gtab").innerHTML=`<tr><th class=l>群組</th><th class=l>龍頭</th><th>檔數</th></tr>`+
+  groups.map(g=>`<tr><td class=l>${esc(g)}</td><td><input type=text data-g="${esc(g)}" value="${esc(cfg.groups[g]||"")}" aria-label="${esc(g)} 的龍頭" style="max-width:120px"></td><td>${cfg.rows.filter(r=>groupOf(r)===g).length}</td></tr>`).join("");
+ $("rows").innerHTML=`<tr>${COLS.map(([,l],i)=>`<th${i<4?" class=l":""}>${l}</th>`).join("")}<th>淨利幣</th><th></th></tr>`+
+  cfg.rows.map((r,i)=>`<tr data-s="${esc([r.sym,r.name,r.sector,r.tags].join(" ").toLowerCase())}">${COLS.map(([k,l,t])=>`<td><input type=${t}${t==="number"?" step=any min=0":""}${k==="sector"?" list=glist":""} data-i=${i} data-k=${k} value="${esc(r[k])}" aria-label="${l}"${k==="tags"?' style="min-width:140px"':k==="sector"?' style="min-width:110px"':""}></td>`).join("")}<td style="text-align:center"><input type=checkbox data-i=${i} data-k=free ${r.free?"checked":""} aria-label="淨利幣"></td><td><button class=g data-del=${i} aria-label="刪除 ${esc(r.sym)}">✕</button></td></tr>`).join("");
+ $("rows").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{readSet(false);cfg.rows.splice(+b.dataset.del,1);fillSet()});
+ filterSet();
+}
+function filterSet(){
+ const q=$("sf").value.trim().toLowerCase();
+ $("rows").querySelectorAll("tr[data-s]").forEach(tr=>tr.style.display=!q||tr.dataset.s.includes(q)?"":"none");
+}
+$("sf").oninput=filterSet;
+function readSet(prune=true){
+ PK.forEach(k=>cfg[k]=num($(k).value));
+ $("gtab").querySelectorAll("input[data-g]").forEach(el=>{cfg.groups[el.dataset.g]=el.value.trim().toUpperCase()});
+ $("rows").querySelectorAll("input[data-k]").forEach(el=>{
+  const r=cfg.rows[+el.dataset.i],k=el.dataset.k;if(!r)return;
+  const v=el.type==="checkbox"?el.checked:el.value.trim();
+  if(k==="sym"&&r.sym&&v.toUpperCase()!==r.sym){ // 改了代號、又沒改 ID：舊 ID 不再適用
+   const idEl=$("rows").querySelector(`input[data-i="${el.dataset.i}"][data-k=id]`);
+   if(idEl&&idEl.value.trim()===String(r.id)){idEl.value="";r.cg="";r.name=""}
+  }
+  r[k]=v;
+ });
+ cfg.rows.forEach(r=>{r.sym=r.sym.toUpperCase();r.leader=(r.leader||"").toUpperCase()});
+ if(prune)cfg.rows=cfg.rows.filter(r=>r.sym);
+}
+
+// ---------- 匯入 / 匯出 ----------
+const AL={sym:["sym","symbol","代號","代币","幣種","幣"],sector:["sector","group","群組","板塊","板块","category"],leader:["leader","龍頭","龙头"],qty:["qty","quantity","數量","数量","amount"],cost:["cost","成本","成本價","成本价","price"],free:["free","淨利幣","净利币","盡力幣","尽力币"],target:["target","目標","目標倉位","目标仓位"],tags:["tags","標籤","标签"],id:["id","cmc","cmc_id","cmc id"],cg:["cg","coingecko","cg_id","coingecko id"],name:["name","名稱","名称"]};
+const FK=["sym","sector","leader","qty","cost","free","target","tags","id","cg","name"];
+const truthy=v=>v===true||/^(1|true|yes|y|是|v|✓|x)$/i.test(String(v||"").trim());
+function normRow(o){
+ const r={...ROW};
+ for(const k of FK){const key=Object.keys(o).find(x=>AL[k].includes(String(x).trim().toLowerCase())||AL[k].includes(String(x).trim()));if(key!==undefined)r[k]=o[key]}
+ for(const k of ["sym","leader"])r[k]=String(r[k]||"").trim().toUpperCase();
+ for(const k of ["sector","name","cg","qty","cost","target"])r[k]=r[k]==null?"":String(r[k]).trim();
+ r.id=r.id==null||r.id===""?"":String(r.id).trim();
+ r.tags=(Array.isArray(r.tags)?r.tags:String(r.tags||"").split(/[|,，]/)).map(s=>String(s).trim()).filter(Boolean).join(", ");
+ r.free=truthy(r.free);return r;
+}
+function parseImport(t){
+ t=t.trim();if(!t)return {list:[]};
+ if(t[0]==="["||t[0]==="{"){
+  let j=JSON.parse(t),extra=null;
+  if(!Array.isArray(j)){if(Array.isArray(j.rows)){extra=j;j=j.rows}else j=j.watchlist||Object.entries(j).map(([k,v])=>typeof v==="object"?{sym:k,...v}:{sym:k})}
+  return {list:j.map(x=>typeof x==="string"?normRow({sym:x}):normRow(x)).filter(r=>r.sym),extra};
+ }
+ const lines=t.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+ const sp=l=>l.split(/\t|,|;/).map(c=>c.trim().replace(/^"|"$/g,""));
+ let head=null;const first=sp(lines[0]);
+ if(first.some(c=>Object.values(AL).some(a=>a.includes(c.toLowerCase())||a.includes(c)))){head=first;lines.shift()}
+ return {list:lines.map(l=>{const c=sp(l);const o={};(head||FK).forEach((h,i)=>o[h]=c[i]!==undefined?c[i]:"");return normRow(o)}).filter(r=>r.sym&&SYM_RE.test(r.sym))};
+}
+function doImport(mode){
+ readSet();const msg=$("impMsg");
+ let res;try{res=parseImport($("imp").value)}catch(e){msg.textContent="格式無法解析："+e.message;return}
+ const {list,extra}=res;
+ if(!list.length){msg.textContent="沒有讀到任何幣種，請檢查格式。";return}
+ // 內建名單裡有的代號，自動補上 ID 與名稱
+ const known=Object.fromEntries(defRows().map(r=>[r.sym,r]));
+ list.forEach(r=>{const k=known[r.sym];if(k){for(const f of ["id","cg","name","sector","tags"])if(!r[f])r[f]=k[f]}});
+ let note="";
+ if(mode==="rep"){
+  cfg.rows=list;
+  if(extra){
+   if(extra.params)PK.forEach(k=>{if(k in extra.params)cfg[k]=num(extra.params[k])});
+   if("pool" in extra)cfg.pool=num(extra.pool);
+   if(Array.isArray(extra.log))cfg.log=extra.log;
+   if(extra.groups&&typeof extra.groups==="object")cfg.groups={...extra.groups};
+   note="，並還原參數、群組、利潤池與交易紀錄";
+  }
+ }else list.forEach(n=>{const i=cfg.rows.findIndex(r=>r.sym===n.sym);if(i>=0){FK.forEach(k=>{if(n[k]!==""&&n[k]!==false)cfg.rows[i][k]=n[k]})}else cfg.rows.push(n)});
+ list.forEach(r=>{if(r.leader&&r.sector&&!cfg.groups[r.sector])cfg.groups[r.sector]=r.leader});
+ save();fillSet();render();
+ msg.textContent=`已匯入 ${list.length} 筆${note}，目前名單共 ${cfg.rows.length} 筆。按「儲存並重算」抓新幣的報價。`;
+}
+function doExport(fmt){
+ readSet();
+ const clean=cfg.rows;
+ $("imp").value=fmt==="json"
+  ?JSON.stringify({version:3,params:Object.fromEntries(PK.filter(k=>k!=="pool").map(k=>[k,cfg[k]])),groups:cfg.groups,pool:cfg.pool,log:cfg.log,rows:clean},null,1)
+  :"sym,sector,leader,qty,cost,free,target,tags,id,cg,name\n"+clean.map(r=>[r.sym,r.sector,r.leader,r.qty,r.cost,r.free?1:0,r.target,tagList(r).join("|"),r.id,r.cg,String(r.name).replace(/[,;\t]/g," ")].join(",")).join("\n");
+ $("impMsg").textContent="已輸出到上方文字框，可直接複製備份。";
+}
+$("impAdd").onclick=()=>doImport("add");$("impRep").onclick=()=>doImport("rep");
+$("expCsv").onclick=()=>doExport("csv");$("expJson").onclick=()=>doExport("json");
+
+// ---------- 資料 ----------
+function meta(){
+ const m={};
+ for(const [s,[id,cg]] of Object.entries(EXTRA))m[s]={id:String(id),cg};
+ for(const r of cfg.rows)if(r.sym)m[r.sym]={id:String(r.id||""),cg:r.cg||""};
+ return m;
+}
+const symbols=()=>[...new Set(["BTC",...cfg.rows.flatMap(r=>[r.sym,leaderOf(r)])].filter(s=>s&&SYM_RE.test(s)))];
+
+const cmcH=()=>cfg.key?{"X-CMC_PRO_API_KEY":cfg.key}:{}; // 沒填就不送，讓 Worker 用 Secret
+async function getJSON(url,headers={}){
+ const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),20000);
+ let r,txt;
+ try{r=await fetch(url,{headers,signal:ctl.signal});txt=await r.text()}
+ catch(e){throw new Error(e.name==="AbortError"?"連線逾時":"無法連線（"+e.message+"）")}
+ finally{clearTimeout(to)}
+ let j=null;try{j=JSON.parse(txt)}catch(e){}
+ if(!r.ok)throw new Error((j&&j.status&&(j.status.error_message||j.status.error_code))||(j&&j.error)||("HTTP "+r.status+(txt&&txt.length<80?" "+txt:"")));
+ if(j==null)throw new Error("回應格式不正確");
+ return j;
+}
+const fromCMC=c=>{const q=c.quote.USD;return {price:q.price,v:q.volume_24h,vc:q.volume_change_24h,mc:q.market_cap||c.self_reported_market_cap||0,fdv:q.fully_diluted_market_cap,c7:q.percent_change_7d,c24:q.percent_change_24h,src:"CMC"}};
+async function fetchCMC(syms,M){
+ const out={},byId={},noId=[],base=`${cfg.worker}/v2/cryptocurrency/quotes/latest?convert=USD&skip_invalid=true`;
+ syms.forEach(s=>M[s]&&M[s].id?byId[M[s].id]=s:noId.push(s));
+ const ids=Object.keys(byId);
+ if(ids.length){
+  const j=await getJSON(`${base}&id=${ids.join(",")}`,cmcH());
+  for(const [id,c] of Object.entries(j.data||{})){const s=byId[id];if(s&&c&&c.quote)out[s]=fromCMC(c)}
+ }
+ if(noId.length){
+  const j=await getJSON(`${base}&symbol=${encodeURIComponent(noId.join(","))}`,cmcH());
+  for(const s of noId){let a=j.data&&j.data[s];if(!a)continue;if(!Array.isArray(a))a=[a];if(!a.length)continue;a.sort((x,y)=>(x.cmc_rank||1e9)-(y.cmc_rank||1e9));out[s]=fromCMC(a[0])}
+ }
+ return out;
+}
+async function fetchCG(syms,M){
+ const out={},byId={};
+ syms.forEach(s=>{if(M[s]&&M[s].cg)byId[M[s].cg]=s});
+ const ids=Object.keys(byId);
+ for(let i=0;i<ids.length;i+=100){ // CoinGecko 前面有 CloudFront，網址太長會被擋，分批查
+  const arr=await getJSON(`${cfg.worker}/cg/coins/markets?vs_currency=usd&per_page=250&price_change_percentage=24h,7d&ids=${encodeURIComponent(ids.slice(i,i+100).join(","))}`,cfg.cgKey?{"x-cg-demo-api-key":cfg.cgKey}:{});
+  for(const c of Array.isArray(arr)?arr:[]){const s=byId[c.id];if(s)out[s]={price:c.current_price,v:c.total_volume,vc:null,mc:c.market_cap||0,fdv:c.fully_diluted_valuation,c7:c.price_change_percentage_7d_in_currency,c24:c.price_change_percentage_24h_in_currency??c.price_change_percentage_24h,src:"CG"}}
+ }
+ return out;
+}
+async function fetchAll(syms){
+ const M=meta();let out={},cmcErr=null,cgErr=null,filled=0;
+ try{out=await fetchCMC(syms,M)}catch(e){cmcErr=e}
+ const miss=syms.filter(s=>!out[s]&&M[s]&&M[s].cg);
+ if(miss.length){try{const g=await fetchCG(miss,M);filled=Object.keys(g).length;Object.assign(out,g)}catch(e){cgErr=e}}
+ if(!Object.keys(out).length)throw new Error([cmcErr&&"CMC "+cmcErr.message,cgErr&&"CoinGecko "+cgErr.message].filter(Boolean).join("；")||"沒有取得任何報價");
+ const notes=[];
+ if(cmcErr)notes.push(`CMC 失敗（${cmcErr.message}），${filled} 檔改用 CoinGecko，群組量能暫時無法判斷`);
+ else if(filled)notes.push(`${filled} 檔由 CoinGecko 補上`);
+ if(cgErr)notes.push("CoinGecko 備援失敗："+cgErr.message);
+ return {Q:out,note:notes.join("；")};
+}
+function demoQuotes(syms){
+ const big=new Set([...Object.values(cfg.groups),...Object.keys(EXTRA)]);
+ const seed=s=>[...s].reduce((a,c)=>a*31+c.charCodeAt(0)>>>0,7);const o={};
+ syms.forEach(s=>{const n=seed(s),r=x=>((n>>x)%1000)/1000;const mc=big.has(s)?(5e9+r(3)*3e10):(1e7+r(5)*1.5e9);
+  o[s]={price:r(2)*30+.0005,mc,fdv:mc*(1.05+r(4)),v:mc*(.01+r(6)*.25),vc:r(9)*80-30,c7:r(7)*80-25,c24:r(8)*16-6,src:"DEMO"}});
+ return o;
+}
+
+async function run(){
+ if(busy)return;
+ busy=true;$("refresh").disabled=true;$("refresh").textContent="更新中…";$("err").textContent="";
+ if(!Q)$("out").innerHTML='<p class="mut">載入中…</p>';
+ try{
+  const syms=symbols();let note="";
+  if(cfg.demo)Q=demoQuotes(syms);else{const r=await fetchAll(syms);Q=r.Q;note=r.note}
+  Qt=Date.now();
+  if(!cfg.demo)ls.set(QK,{t:Qt,Q});
+  $("note").textContent=note;
+  render();
+  $("stamp").textContent=(cfg.demo?"示範資料・":"")+"更新於 "+new Date(Qt).toLocaleTimeString();
+ }catch(e){
+  if(!Q)$("out").innerHTML="";
+  $("err").textContent="取得資料失敗："+e.message+"。請檢查 Worker 網址、API Key（或 Worker Secret）與 Worker 的 ALLOW 網域設定。"+(Q?"目前顯示的是上次的資料。":"");
+ }finally{busy=false;$("refresh").disabled=false;$("refresh").textContent="重新整理"}
+}
+
+// ---------- 判斷 ----------
+function analyze(){
+ const rows=cfg.rows.filter(r=>r.sym&&Q[r.sym]);
+ const miss=cfg.rows.filter(r=>r.sym&&!Q[r.sym]).map(r=>r.sym);
+ const turn=q=>q.mc?q.v/q.mc*100:0;
+ const M7=med(rows.map(r=>Q[r.sym].c7));
+ const MT=med(rows.map(r=>turn(Q[r.sym])));
+
+ // 群組：7 日中位、換手中位、24H 量變化（由各幣 volume_change_24h 回推昨日量再加總）
+ const S={};
+ for(const r of rows){
+  const k=groupOf(r),q=Q[r.sym];
+  const s=S[k]||(S[k]={name:k,c7:[],c24:[],t:[],n:0,vNow:0,vPrev:0});
+  s.n++;s.c7.push(q.c7);s.c24.push(q.c24);s.t.push(turn(q));
+  if(ok(q.vc)&&q.vc>-100&&ok(q.v)){s.vNow+=q.v;s.vPrev+=q.v/(1+q.vc/100)}
+ }
+ const secs=Object.values(S);
+ secs.forEach(s=>{s.m7=med(s.c7);s.m24=med(s.c24);s.mt=med(s.t);s.vc=s.vPrev?(s.vNow/s.vPrev-1)*100:null});
+ const MS=med(secs.map(s=>s.m7));
+ secs.forEach(s=>{
+  s.lag=secs.length>1&&s.m7<MS;
+  s.inflow=ok(s.vc)&&s.vc>=cfg.p6;
+  s.hot=(secs.length>1&&s.m7-MS>=cfg.p2)||s.m7>=cfg.p3;
+  s.cold=s.m7<=0&&(ok(s.vc)?s.vc<0:s.mt<cfg.p4*1.5);
+  s.st=s.hot?"hot":s.lag&&s.inflow?"in":s.cold?"cold":"mid";
+ });
+
+ const its=rows.map(r=>{
+  const q=Q[r.sym],s=S[groupOf(r)],t=turn(q),dev=q.c7-M7,lead=leaderOf(r);
+  const L=lead&&lead!==r.sym?Q[lead]:null;
+  const lf=L&&(L.fdv||L.mc),mf=q.fdv||q.mc;
+  const fr=lf&&mf?mf/lf*100:null;
+  const qty=num(r.qty),cost=num(r.cost),val=qty*q.price,principal=qty*cost;
+  const isFree=r.free||(qty>0&&!cost&&r.cost!=="");
+  const x={r,q,s,t,fr,lead,qty,cost,val,principal,isFree,tags:tagList(r),pnl:qty&&cost?(q.price/cost-1)*100:null,target:num(r.target)||cfg.target,why:[],act:"",st:"gry",trade:null};
+  const hotWhy=[];
+  if(fr!=null&&fr>=cfg.p1)hotWhy.push(`FDV 已達龍頭 ${lead} 的 ${fr.toFixed(0)}%`);
+  if(dev>=cfg.p2)hotWhy.push(`7 日領先名單中位數 ${dev.toFixed(0)} 點`);
+  if(q.c7>=cfg.p3)hotWhy.push(`7 日漲幅 ${q.c7.toFixed(0)}%`);
+  const dry=q.v<cfg.p5||t<cfg.p4;
+
+  if(isFree&&s.cold){
+   x.why.push(`群組熱度退燒（7 日中位 ${sg(s.m7)}%${ok(s.vc)?`、量 ${sg(s.vc,0)}%`:""}）`);
+   x.act="淨利幣所屬群組降溫，考慮清空，把資金移到綠燈標的。";
+   if(qty)x.trade={side:"sell",qty};
+  }else if(hotWhy.length){
+   x.st="red";x.why.push(...hotWhy);
+   if(isFree){x.act="這是淨利幣，本金已收回，不用再回本。可續抱讓利潤跑；若想鎖利，分批停利一部分（例如先賣一半）轉進綠燈標的。";if(qty)x.trade={side:"sell",qty:qty/2}}
+   else if(qty&&cost){
+    if(q.price>cost){const sq=principal/q.price;x.act=`賣出約 ${fq(sq)} 枚收回本金 ${usd(principal)}，剩 ${fq(qty-sq)} 枚（約 ${usd(val-principal)}）當淨利幣。`;x.trade={side:"sell",qty:sq}}
+    else x.act="現價尚未高於成本，不適用回本；若群組過熱再評估減碼。";
+   }else x.act="填入數量與成本價後，可算出收回本金的賣出量。";
+  }else if(dry){
+   x.why.push(q.v<cfg.p5?`24H 量 ${usd(q.v)} 不足`:`換手率 ${t.toFixed(1)}% 偏低`);x.act="持有不動或放棄加倉。";
+  }else{
+   const inSec=s.n===1||q.c7<=s.m7,turnUp=t>=Math.max(cfg.p4*1.5,MT);
+   if(s.lag&&s.inflow&&inSec&&turnUp){
+    x.st="grn";
+    x.why.push(`${s.name} 落後（7 日中位 ${sg(s.m7)}%）且量能 ${sg(s.vc,0)}%`);
+    if(s.n>1)x.why.push(`群組內落後中位 ${(s.m7-q.c7).toFixed(0)} 點`);
+    x.why.push(`換手率 ${t.toFixed(1)}%（名單中位 ${MT.toFixed(1)}%）`);
+   }else{
+    x.why.push("尚無明確訊號："+(!s.lag?"群組未落後":!s.inflow?`群組量能${ok(s.vc)?" "+sg(s.vc,0)+"%":"無資料"}未達流入門檻`:!inSec?"已高於群組中位":"換手率未放大"));
+    x.act="觀察。";
+   }
+  }
+  return x;
+ });
+
+ // 綠燈：依「目標倉位缺口」比例分配利潤池
+ const greens=its.filter(x=>x.st==="grn");
+ const gaps=greens.map(x=>x.target?Math.max(0,x.target-x.val):0);
+ const totalGap=sum(gaps),pool=Math.max(0,cfg.pool);
+ greens.forEach((x,i)=>{
+  const gap=gaps[i];
+  if(!x.target){x.act="可用抽回的利潤分批進場。設定目標倉位後，可算出要加碼多少。";x.trade={side:"buy",qty:0};return}
+  if(!gap){x.act=`已達目標倉位 ${usd(x.target)}，不必再加。`;return}
+  const alloc=totalGap?Math.min(gap,pool*gap/totalGap):0;
+  x.act=`目標 ${usd(x.target)}，現值 ${usd(x.val)}，還差 ${usd(gap)}。`+(alloc>0?`利潤池可撥 ${usd(alloc)}（約 ${fq(alloc/x.q.price)} 枚），分批進場。`:"利潤池目前是空的，可等紅燈收回後再補。");
+  x.trade={side:"buy",qty:(alloc||gap)/x.q.price};
+ });
+ const M24=med(rows.map(r=>Q[r.sym].c24));
+ return {items:its,secs,miss,M7,M24,MS,MT,focus:focus(its,secs,{M7,M24,MS,MT})};
+}
+
+// ---------- 今日重點：市場狀態、觀察板塊、買進候選 ----------
+function focus(its,secs,{M7,M24,MS,MT}){
+ // 市場狀態：名單 7 日中位數 vs BTC（只是提醒，不影響候選）
+ const btc=Q.BTC,eth=Q.ETH;let mkt;
+ if(!btc||!ok(btc.c7))mkt={k:"mid",t:"無法判斷大盤",d:"抓不到 BTC 報價。"};
+ else{
+  const diff=M7-btc.c7,ethRel=eth&&ok(eth.c7)?eth.c7-btc.c7:null;
+  const nums=`BTC 7 日 ${sg(btc.c7)}%・名單中位 ${sg(M7)}%${ethRel!=null?`・ETH 相對 BTC ${sg(ethRel)} 點`:""}`;
+  if(btc.c7<=-5&&M7<=-5)mkt={k:"red",t:"全面走弱",d:"BTC 和山寨一起跌，落後的幣多半只是跌更多，不是還沒輪到。",nums};
+  else if(diff>=2)mkt={k:"grn",t:"山寨輪動中",d:"山寨跑贏 BTC，資金在往外溢，輪動策略最有效的時候。",nums};
+  else if(btc.c7>0&&diff<=-2)mkt={k:"yel",t:"資金還在 BTC",d:"BTC 漲、山寨落後，輪動還沒開始；候選僅供參考。",nums};
+  else mkt={k:"mid",t:"盤整、方向不明",d:"山寨和 BTC 差不多，輪動訊號的可信度普通。",nums};
+ }
+
+ // 觀察板塊：資金流入的群組依「量能＋落後幅度＋24H 轉強」排序
+ const why=s=>[`7 日 ${sg(s.m7)}%（落後基準 ${Math.max(0,MS-s.m7).toFixed(1)} 點）`,ok(s.vc)?`24H 量 ${sg(s.vc,0)}%`:null,`24H ${s.m24>M24?"已轉強":"尚未轉強"}（${sg(s.m24)}%）`].filter(Boolean);
+ const score=s=>Math.min(ok(s.vc)?s.vc:0,150)/10+Math.min(Math.max(0,MS-s.m7),15)/3+(s.m24-M24);
+ let watch=secs.filter(s=>s.st==="in").sort((a,b)=>score(b)-score(a)).slice(0,2).map(s=>({s,why:why(s),small:s.n<3}));
+ let near=null;
+ if(!watch.length){ // 沒有群組達標：找最接近的（落後中、量能最高）
+  const c=secs.filter(s=>s.lag&&ok(s.vc)).sort((a,b)=>b.vc-a.vc)[0];
+  if(c)near={s:c,why:why(c),gap:cfg.p6-c.vc};
+ }
+
+ // 買進候選：綠燈依「換手放大＋24H 轉強＋群組內落後」排序
+ const bs=x=>Math.min(x.t/(MT||1),5)+(x.q.c24>0?1:0)+(x.s.m7-x.q.c7)/10;
+ let buys=its.filter(x=>x.st==="grn").sort((a,b)=>bs(b)-bs(a)).slice(0,3),buyAlt=false;
+ if(!buys.length){ // 沒有綠燈：列出觀察板塊裡換手最高、沒過熱的幣
+  const g=(watch[0]||near||{}).s;
+  if(g){buys=its.filter(x=>x.s===g&&x.st!=="red").sort((a,b)=>b.t-a.t).slice(0,3);buyAlt=true}
+ }
+ const sells=its.filter(x=>x.st==="red"&&x.qty>0&&x.trade&&x.trade.side==="sell");
+ return {mkt,watch,near,buys,buyAlt,sells};
+}
+
+// 記住每檔燈號，標出 24 小時內新轉紅／轉綠的標的
+function track(its){
+ const key=cfg.demo?LK+"_demo":LK,last=ls.get(key,{}),now=Date.now();
+ for(const x of its){
+  const p=last[x.r.sym];
+  if(!p||p.st!==x.st)last[x.r.sym]={st:x.st,since:now,prev:p?p.st:null};
+  const c=last[x.r.sym];
+  x.since=c.since;x.prev=c.prev;
+  x.fresh=!!c.prev&&x.st!=="gry"&&now-c.since<24*3600e3;
+ }
+ ls.set(key,last);
+}
+
+// ---------- 交易與利潤池 ----------
+function tradeCalc(r,side,q,p){
+ const qty=num(r.qty),cost=num(r.cost),principal=qty*cost;
+ if(side==="sell"){
+  q=Math.min(q,qty);
+  const proceeds=q*p;let back=Math.min(proceeds,principal),np=principal-back;
+  if(principal>0&&np<Math.max(.01,principal*.002)){back=principal;np=0} // 價格／數量四捨五入造成的零頭，視為已回本
+  const profit=Math.max(0,proceeds-back),nq=qty-q;
+  return {q,proceeds,back,profit,pd:profit,nq,nc:nq>0?np/nq:0,free:nq>0&&np===0?true:r.free};
+ }
+ const spend=q*p,fromPool=Math.min(spend,Math.max(0,cfg.pool)),nq=qty+q;
+ return {q,spend,fromPool,pd:-fromPool,back:0,nq,nc:(principal+spend)/nq,free:false};
+}
+function openTrade(i){
+ const x=items[i];if(!x)return;
+ T={sym:x.r.sym};
+ $("dsym").textContent=x.r.sym;
+ $("dside").value=x.trade?x.trade.side:x.qty?"sell":"buy";
+ $("dq").value=x.trade&&x.trade.qty?+x.trade.qty.toPrecision(10):"";
+ $("dp").value=+x.q.price.toPrecision(10);
+ prevTrade();$("dlg").showModal();
+}
+function prevTrade(){
+ const r=cfg.rows.find(x=>x.sym===T.sym),side=$("dside").value,q=num($("dq").value),p=num($("dp").value),out=$("dprev");
+ $("dok").disabled=true;
+ if(!r){out.textContent="名單裡找不到這檔。";return}
+ if(!(q>0&&p>0)){out.textContent="請填入數量與成交價。";return}
+ if(side==="sell"&&!(num(r.qty)>0)){out.textContent="這檔沒有填持倉數量，無法記錄賣出。請先在策略設定填入數量與成本價。";return}
+ const c=tradeCalc(r,side,q,p);
+ out.innerHTML=side==="sell"
+  ?`${c.q<q?`超過持倉，以 ${fq(c.q)} 枚計。<br>`:""}賣出 ${fq(c.q)} 枚，入帳 ${usd(c.proceeds)}：收回本金 ${usd(c.back)}，<b>${usd(c.profit)}</b> 進利潤池。<br>之後剩 ${fq(c.nq)} 枚${c.nq>0?(c.nc>0?`，成本價 ${px(c.nc)}`:"，成本歸零，成為淨利幣"):""}。`
+  :`買入 ${fq(c.q)} 枚，花費 ${usd(c.spend)}：<b>${usd(c.fromPool)}</b> 從利潤池扣除${c.spend>c.fromPool?`，另外 ${usd(c.spend-c.fromPool)} 算新投入本金`:""}。<br>之後共 ${fq(c.nq)} 枚，成本價 ${px(c.nc)}。`;
+ $("dok").disabled=false;
+}
+["dside","dq","dp"].forEach(id=>$(id).addEventListener("input",prevTrade));
+$("dlg").addEventListener("close",()=>{
+ if($("dlg").returnValue!=="ok"||!T)return;
+ const open=setOpen();if(open)readSet();
+ const r=cfg.rows.find(x=>x.sym===T.sym),side=$("dside").value,q=num($("dq").value),p=num($("dp").value);
+ if(!r||!(q>0&&p>0))return;
+ const c=tradeCalc(r,side,q,p);
+ cfg.log.push({t:Date.now(),sym:r.sym,side,q:c.q,p,pd:c.pd,back:c.back,before:{qty:r.qty,cost:r.cost,free:r.free}});
+ cfg.log=cfg.log.slice(-200);
+ r.qty=c.nq>0?String(+c.nq.toPrecision(10)):"";
+ r.cost=c.nq>0?String(+c.nc.toPrecision(10)):"";
+ r.free=c.nq>0?c.free:false;
+ cfg.pool=+(cfg.pool+c.pd).toFixed(2);
+ save();if(open)fillSet();render();
+});
+function undoTrade(){
+ const l=cfg.log[cfg.log.length-1];if(!l)return;
+ if(!confirm(`撤銷最後一筆：${l.side==="sell"?"賣出":"買入"} ${l.sym} ${fq(l.q)} 枚？`))return;
+ const open=setOpen();if(open)readSet();
+ cfg.log.pop();
+ const r=cfg.rows.find(x=>x.sym===l.sym);if(r)Object.assign(r,l.before);
+ cfg.pool=+(cfg.pool-l.pd).toFixed(2);
+ save();if(open)fillSet();render();
+}
+
+// ---------- 畫面 ----------
+let lastA=null;
+function render(){
+ if(!Q)return;
+ const A=analyze();items=A.items;track(items);lastA=A;
+ $("err").textContent=A.miss.length?"查無報價："+A.miss.join(", "):"";
+ renderFocus(A);renderStats(A);renderSecs(A);renderFilters(A);renderSignals(A);
+}
+
+const MK={grn:"var(--grn)",yel:"var(--yel)",red:"var(--red)",mid:"var(--gry)"};
+function renderFocus(A){
+ const F=A.focus,m=F.mkt;
+ const secBtn=s=>`<button class="link big" data-fg="${esc(s.name)}" title="只看這個群組">${esc(s.name)}</button>`;
+ const watch=F.watch.length
+  ?F.watch.map((w,i)=>`<div class="pick"><div><div class="pt">${secBtn(w.s)}<span class="tag mut">${i===0?"首選":"次選"}</span>${w.small?'<span class="tag mut">只有 '+w.s.n+' 檔，樣本少</span>':""}</div><div class="why">${esc(w.why.join("・"))}</div></div></div>`).join("")
+  :F.near
+   ?`<div class="pick"><div><div class="pt">${secBtn(F.near.s)}<span class="tag mut">最接近達標</span></div><div class="why">還沒有群組達標；量能還差 ${F.near.gap.toFixed(0)}% 達流入門檻</div><div class="why">${esc(F.near.why.join("・"))}</div></div></div>`
+   :`<p class="mut" style="margin:4px 0">目前沒有落後且有量能資料的群組。${A.secs.every(s=>!ok(s.vc))?"（CMC 未回應，缺 24H 量變化）":""}</p>`;
+ const buyLine=x=>{
+  const amt=x.st==="grn"&&x.trade&&x.trade.qty?`<div class="why">${esc(x.act)}</div>`:"";
+  const reason=x.st==="grn"?x.why.slice(1).join("・"):`換手 ${x.t.toFixed(1)}%・7 日 ${sg(x.q.c7)}%・24H ${sg(x.q.c24)}%`;
+  return `<div class="pick"><div><div class="pt"><span class="big">${esc(x.r.sym)}</span></div><div class="sub">${esc([x.r.name,groupOf(x.r)].filter(Boolean).join("・"))}</div><div class="why">${esc(reason)}</div>${amt}</div><button class="g s" data-trade="${items.indexOf(x)}">${x.st==="grn"?"記錄買入":"記錄交易"}</button></div>`;
+ };
+ const buys=F.buys.length?F.buys.map(buyLine).join(""):'<p class="mut" style="margin:4px 0">目前沒有符合條件的標的，先觀察就好。</p>';
+ const sells=F.sells.length?`<p style="margin:12px 0 0;font-size:14px"><b style="color:var(--red)">該收回本金：</b>${F.sells.map(x=>`<button class="link" data-trade="${items.indexOf(x)}">${esc(x.r.sym)}</button>（賣約 ${fq(x.trade.qty)} 枚）`).join("、")}</p>`:"";
+ $("focus").innerHTML=`<div class="card focus" style="--c:${MK[m.k]}">
+  <div class="mk"><div class="lbl">市場狀態</div><div class="mk-t"><i class="dot"></i><b>${m.t}</b></div>${m.nums?`<div class="nums">${m.nums}</div>`:""}<p>${m.d}</p></div>
+  <div class="fgrid">
+   <div class="fbox"><h3>建議觀察的板塊</h3>${watch}</div>
+   <div class="fbox"><h3>${F.buyAlt?"還沒有綠燈，觀察板塊裡換手最高的幣":"依你的規則，目前最符合的買進候選"}</h3>${buys}</div>
+  </div>${sells}
+  <p class="hint" style="margin-top:10px">由規則自動算出，不是投資建議；規則尚未回測，市場狀態只是提醒、不會影響候選。</p>
+ </div>`;
+}
+$("focus").addEventListener("click",e=>{
+ const g=e.target.closest("[data-fg]");
+ if(g){cfg.ui={q:"",group:g.dataset.fg,tag:"",held:false};save();renderSecs(lastA);renderFilters(lastA);renderSignals(lastA);$("filt").scrollIntoView({behavior:"smooth"});return}
+ const t=e.target.closest("[data-trade]");if(t)openTrade(+t.dataset.trade);
+});
+
+function renderStats(A){
+ const held=A.items.filter(x=>x.qty>0);
+ if(!held.length&&!cfg.pool&&!cfg.log.length){$("stats").innerHTML="";return}
+ const val=sum(held.map(x=>x.val)),prin=sum(held.map(x=>x.principal));
+ const freeV=sum(held.filter(x=>x.isFree).map(x=>x.val));
+ const back=sum(cfg.log.filter(l=>l.side==="sell").map(l=>l.back||0));
+ const tile=(k,v,d="")=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+ const logs=cfg.log.slice(-20).reverse();
+ $("stats").innerHTML=`<div class="stats">`+
+  tile("持倉市值",usd(val),`${held.length} 檔`)+
+  tile("剩餘本金",usd(prin),"還沒收回的成本")+
+  tile("未實現損益",`<span class="${val-prin>=0?"pos":"neg"}">${val-prin>=0?"+":""}${usd(val-prin)}</span>`,prin?pc((val/prin-1)*100):"")+
+  tile("淨利幣占比",val?(freeV/val*100).toFixed(0)+"%":"-",`市值 ${usd(freeV)}`)+
+  tile("已收回本金",usd(back),"來自記錄的賣出")+
+  tile("利潤池",usd(cfg.pool),"可分配給綠燈標的")+
+  `</div>`+
+  (cfg.log.length?`<details class="card" style="padding:10px 14px"><summary>交易紀錄（${cfg.log.length} 筆）</summary><ul class="log">`+
+   logs.map((l,i)=>`<li>${new Date(l.t).toLocaleDateString()}　${l.side==="sell"?"賣出":"買入"} <b>${esc(l.sym)}</b> ${fq(l.q)} 枚 @ ${px(l.p)}　<span class="mut">利潤池 ${l.pd>=0?"+":""}${usd(l.pd)}</span>${i===0?' <button class="g s" id="undo">撤銷</button>':""}</li>`).join("")+
+   `</ul></details>`:"");
+ const u=$("undo");if(u)u.onclick=undoTrade;
+}
+
+const SEC={hot:["過熱","var(--red)"],in:["資金流入","var(--grn)"],cold:["退燒","var(--gry)"],mid:["中性","var(--mut)"]};
+function renderSecs(A){
+ if(!A.secs.length){$("secs").innerHTML="";return}
+ const span=Math.max(20,...A.secs.map(s=>Math.abs(s.m7)));
+ const noVol=A.secs.every(s=>!ok(s.vc));
+ $("secs").innerHTML=`<div class="card"><h2>群組總覽</h2><p class="s" style="margin:2px 0 0">長條是群組 7 日中位數，以 0 為中線；各群組的基準是 ${sg(A.MS)}%。低於基準、且 24H 量成長 ≥ ${cfg.p6}% 的群組標為資金流入，綠燈只從這些群組裡挑。點卡片可以只看該群組。${noVol?"<br><b>目前沒有 24H 量變化資料（CMC 未回應），資金流入無法判斷。</b>":""}</p><div class="secs">`+
+  [...A.secs].sort((a,b)=>b.m7-a.m7).map(s=>{
+   const [lab,c]=SEC[s.st],w=Math.min(50,Math.abs(s.m7)/span*50),on=cfg.ui.group===s.name;
+   return `<button class="sc-card" style="--c:${c}" data-g="${esc(s.name)}" aria-pressed="${on}"><span class="row" style="justify-content:space-between"><b>${esc(s.name)}</b><span class="tag" style="color:${c}">${lab}</span></span>`+
+    `<span class="bar" style="display:block" role="img" aria-label="7 日中位 ${sg(s.m7)}%"><i style="left:${s.m7>=0?50:50-w}%;width:${w}%"></i></span>`+
+    `<span class="m" style="display:block">7 日中位 ${pc(s.m7)}・24H 量 ${ok(s.vc)?pc(s.vc):"-"}</span><span class="m" style="display:block">換手中位 ${s.mt.toFixed(1)}%・${s.n} 檔</span></button>`;
+  }).join("")+`</div></div>`;
+}
+$("secs").addEventListener("click",e=>{
+ const b=e.target.closest("[data-g]");if(!b)return;
+ cfg.ui.group=cfg.ui.group===b.dataset.g?"":b.dataset.g;save();
+ renderSecs(lastA);renderFilters(lastA);renderSignals(lastA);
+});
+
+function renderFilters(A){
+ const groups=[...new Set(cfg.rows.map(groupOf))];
+ const tags=[...new Set(cfg.rows.flatMap(tagList))].sort((a,b)=>a.localeCompare(b,"zh-Hant"));
+ if(cfg.ui.group&&!groups.includes(cfg.ui.group))cfg.ui.group="";
+ if(cfg.ui.tag&&!tags.includes(cfg.ui.tag))cfg.ui.tag="";
+ $("fg").innerHTML=`<option value="">全部群組</option>`+groups.map(g=>`<option${g===cfg.ui.group?" selected":""}>${esc(g)}</option>`).join("");
+ $("ft").innerHTML=`<option value="">全部標籤</option>`+tags.map(t=>`<option${t===cfg.ui.tag?" selected":""}>${esc(t)}</option>`).join("");
+ if(document.activeElement!==$("fq"))$("fq").value=cfg.ui.q;
+ $("fh").checked=cfg.ui.held;
+}
+const onFilter=()=>{cfg.ui={q:$("fq").value,group:$("fg").value,tag:$("ft").value,held:$("fh").checked};save();if(lastA){renderSecs(lastA);renderSignals(lastA)}};
+["fq","fg","ft","fh"].forEach(id=>$(id).addEventListener(id==="fq"?"input":"change",onFilter));
+$("fclr").onclick=()=>{cfg.ui={q:"",group:"",tag:"",held:false};save();if(lastA){renderSecs(lastA);renderFilters(lastA);renderSignals(lastA)}};
+function pass(x){
+ const u=cfg.ui,q=u.q.trim().toLowerCase();
+ if(u.group&&groupOf(x.r)!==u.group)return false;
+ if(u.tag&&!x.tags.includes(u.tag))return false;
+ if(u.held&&!(x.qty>0))return false;
+ if(q&&![x.r.sym,x.r.name,groupOf(x.r),...x.tags].join(" ").toLowerCase().includes(q))return false;
+ return true;
+}
+
+const TC=[["sym","代幣",1],["sector","群組",1],["price","價格"],["c7","7日"],["c24","24H"],["t","換手率"],["fr","FDV/龍頭"],["val","持倉"],["pnl","損益"]];
+const SORT={sym:x=>x.r.sym,sector:x=>groupOf(x.r),price:x=>x.q.price,c7:x=>x.q.c7,c24:x=>x.q.c24,t:x=>x.t,fr:x=>x.fr,val:x=>x.qty?x.val:null,pnl:x=>x.pnl};
+function cmp(a,b){
+ const f=SORT[sortBy.k];let u=f(a),v=f(b);
+ if(typeof u==="string"||typeof v==="string")return String(u||"").localeCompare(String(v||""),"zh-Hant")*sortBy.dir;
+ u=ok(u)?u:-Infinity;v=ok(v)?v:-Infinity;
+ return u===v?0:(u<v?-1:1)*sortBy.dir;
+}
+function renderSignals(A){
+ const G={red:[],grn:[],gry:[]};
+ A.items.forEach((x,i)=>{x.i=i;if(pass(x))G[x.st].push(x)});
+ const shown=G.red.length+G.grn.length+G.gry.length,filtered=shown<A.items.length;
+ $("sum").innerHTML=`<div><b style="color:var(--red)">${G.red.length}</b> <span class="mut">過熱</span></div><div><b style="color:var(--grn)">${G.grn.length}</b> <span class="mut">窪地</span></div><div><b style="color:var(--gry)">${G.gry.length}</b> <span class="mut">觀望</span></div><div><span class="mut">名單 7 日中位數</span> <b>${A.M7.toFixed(1)}%</b></div>`+(filtered?`<div class="mut" style="font-size:13px">篩選中：顯示 ${shown} / ${A.items.length} 檔</div>`:"");
+ const meta=[["red","過熱區","準備收回本金"],["grn","窪地區","適合利潤加倉"],["gry","觀望區","流動性不足或無動能"]];
+ const head=`<tr class="h">`+TC.map(([k,l,left])=>`<th${left?" class=l":""} aria-sort="${sortBy.k===k?(sortBy.dir<0?"descending":"ascending"):"none"}"><button class="th" data-s="${k}">${l}${sortBy.k===k?(sortBy.dir<0?" ↓":" ↑"):""}</button></th>`).join("")+`<th class=l>依據與建議</th></tr>`;
+ const table=list=>`<div class="sc"><table>${head}`+list.sort(cmp).map(rowHTML).join("")+`</table></div>`;
+ $("out").innerHTML=meta.map(([k,t0,sub])=>{
+  const t=`<i class="dot"></i>${t0}<span class="h2s">${sub}</span>`;
+  const list=G[k],body=list.length?table(list):'<p class="mut" style="margin:8px 0 0">目前沒有標的。</p>';
+  // 觀望區通常最多，預設收合
+  if(k==="gry")return `<details class="card sec" id="gray" style="--c:${COLR[k]}"${grayOpen?" open":""}><summary><h2>${t}</h2> <span class="mut" style="font-size:13px">　${list.length} 檔・點開查看</span></summary>${body}</details>`;
+  return `<div class="card sec" style="--c:${COLR[k]}"><h2>${t}</h2>${body}</div>`;
+ }).join("");
+}
+function rowHTML(x){
+ const tag=x.fresh?`<span class="tag" style="color:${COLR[x.st]}" title="${new Date(x.since).toLocaleString()}">新・原${ST[x.prev]}・${ago(x.since)}</span>`:"";
+ const src=x.q.src==="CG"?'<span class="tag mut" title="此檔報價來自 CoinGecko，沒有 24H 量變化">CG</span>':"";
+ const btn=x.trade?(x.trade.side==="sell"?"記錄賣出":"記錄買入"):"記錄交易";
+ const sub=[x.r.name,...x.tags].filter(Boolean).join("・");
+ return `<tr><td class="first"><b>${esc(x.r.sym)}</b>${x.isFree?' <span class="mut">淨</span>':""}${tag}${src}${sub?`<div class="nm">${esc(sub)}</div>`:""}</td>`+
+  `<td class="l mut" data-l="群組">${esc(groupOf(x.r))}</td>`+
+  `<td data-l="價格">${px(x.q.price)}</td><td data-l="7日">${pc(x.q.c7)}</td><td data-l="24H">${pc(x.q.c24)}</td>`+
+  `<td data-l="換手率">${x.t.toFixed(1)}%</td><td data-l="FDV/龍頭"${x.lead?` title="對比 ${esc(x.lead)}"`:""}>${x.fr==null?"-":x.fr.toFixed(0)+"%"}</td>`+
+  `<td data-l="持倉">${x.qty?usd(x.val):"-"}</td><td data-l="損益">${x.isFree?'<span class="mut">淨利幣</span>':x.pnl==null?"-":pc(x.pnl)}</td>`+
+  `<td class="act">${esc(x.why.join("；"))}<br><span class="mut">${esc(x.act)}</span> <button class="g s" data-trade="${x.i}">${btn}</button></td></tr>`;
+}
+$("out").addEventListener("toggle",e=>{if(e.target.id==="gray")grayOpen=e.target.open},true);
+$("out").addEventListener("click",e=>{
+ const s=e.target.closest("[data-s]");
+ if(s){const k=s.dataset.s;sortBy=sortBy.k===k?{k,dir:-sortBy.dir}:{k,dir:k==="sym"||k==="sector"?1:-1};if(lastA)renderSignals(lastA);return}
+ const t=e.target.closest("[data-trade]");if(t)openTrade(+t.dataset.trade);
+});
+
+// ---------- 啟動 ----------
+$("wk").value=cfg.worker;$("ak").value=cfg.key;$("gk").value=cfg.cgKey;$("auto").value=String([0,15,30,60].includes(cfg.auto)?cfg.auto:0);cfg.auto=+$("auto").value;
+view();
+</script>
+</body>
+</html>
