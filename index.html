@@ -24,7 +24,7 @@ body{margin:0;min-height:100vh;color:var(--fg);font:15px/1.6 var(--sans);font-va
 /* 底片顆粒 */
 body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.07;mix-blend-mode:overlay;
  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-.w{max-width:1120px;margin:0 auto;padding:64px 24px 48px}
+.w{max-width:1440px;margin:0 auto;padding:64px 32px 48px}
 
 /* 標頭 */
 .hd{margin-bottom:36px}
@@ -67,7 +67,7 @@ details>summary::marker{color:var(--dim)}
 /* 表格 */
 .sc{overflow-x:auto}
 table{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px}
-th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th,td{padding:14px 16px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
 td{font:13.5px/1.5 var(--sans)}
 th:first-child,td:first-child,td.l,th.l{text-align:left}
 td.act{white-space:normal;text-align:left;min-width:260px;font-size:13px;line-height:1.6}
@@ -77,8 +77,7 @@ button.th{background:none;border:0;padding:0;color:inherit;font:inherit;font-wei
 button.th:hover{color:var(--fg);background:none}
 
 /* 燈號 */
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);flex-shrink:0;
- box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 16%,transparent),0 0 10px color-mix(in srgb,var(--c) 45%,transparent)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0;background:color-mix(in srgb,var(--c) 65%,#8a8a8a)}
 .sec{border-left:2px solid var(--c)}
 .sec h2{display:flex;align-items:center;gap:10px}
 .sec h2 .h2s{font:400 13px var(--sans);color:var(--mut);letter-spacing:.02em}
@@ -109,7 +108,9 @@ code{background:var(--well);padding:1px 5px;border-radius:4px;font:12px ui-monos
 .focus .mk .nums{font-size:12.5px;color:var(--mut)}
 .focus .mk p{margin:6px 0 0;font-size:13.5px;color:var(--fg);opacity:.85}
 .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:16px}
-.fbox{background:transparent;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.fbox{background:transparent;border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column}
+.picks{flex:1;display:flex;flex-direction:column}
+.picks>.pick{flex:1 1 0;align-items:center}
 .pick{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
 .pick:first-of-type{border-top:0;padding-top:2px}
 .pick .big{font:700 20px/1.3 var(--sans);letter-spacing:.01em}
@@ -129,20 +130,47 @@ button.link:hover{color:var(--acc2);background:none;text-decoration:underline;te
 .stat .d{font-size:12px;color:var(--mut)}
 
 /* 群組總覽 */
-.secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:10px;margin-top:12px}
-button.sc-card{display:block;width:100%;text-align:left;background:var(--well);color:var(--fg);font-weight:400;letter-spacing:0;border:1px solid var(--line);border-left:2px solid var(--c);border-radius:8px;padding:10px 12px}
+.secs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;margin-top:18px}
+button.sc-card{display:block;width:100%;text-align:left;background:var(--well);color:var(--fg);font-weight:400;letter-spacing:0;border:1px solid var(--line);border-left:2px solid var(--c);border-radius:10px;padding:16px 18px}
 button.sc-card:hover{background:var(--well);color:var(--fg)}
 button.sc-card[aria-pressed=true]{outline:1px solid var(--fg);outline-offset:2px}
-.sc-card b{font:700 15px var(--sans)}
-.sc-card .m{font-size:12px;color:var(--mut)}
+.sc-card b{font:700 16px var(--sans)}
+.sc-card .m{font-size:13px;line-height:1.8;color:var(--mut)}
 .bar{height:4px;background:var(--line);border-radius:2px;position:relative;overflow:hidden;margin:9px 0 7px}
-.bar i{position:absolute;top:0;bottom:0;background:var(--c);box-shadow:0 0 8px var(--c)}
+.bar i{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--c) 65%,#8a8a8a)}
 .bar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--dim)}
 
+/* 分頁面板：群組總覽／過熱區／窪地區／觀望區 */
+.panel{margin-bottom:16px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.tab{display:flex;align-items:center;gap:10px;background:transparent;color:var(--dim);font:600 15px/1.2 var(--sans);letter-spacing:.02em;text-align:left;
+ border:1px solid var(--line);border-left-width:0;border-radius:0;padding:18px 20px;margin:0;transition:color .15s}
+.tab:first-child{border-left-width:1px;border-top-left-radius:12px}
+.tab:last-child{border-top-right-radius:12px}
+.tab:hover{background:transparent;border-color:var(--line);color:var(--mut)}
+.tab[aria-selected=true]{background:var(--card);color:var(--fg);border-bottom-color:var(--card);border-radius:12px 12px 0 0}
+.tab[aria-selected=true]:not(:first-child){border-left-width:1px;margin-left:-1px;position:relative}
+.tab[aria-selected=true] .dot{opacity:1}
+.tab .dot{opacity:.55}
+.tab .n{margin-left:auto;font-weight:700;font-size:15px;color:var(--c,var(--fg))}
+.tab[aria-selected=false] .n{opacity:.6}
+.pane{background:var(--card);border:1px solid var(--line);border-top:0;border-radius:0 0 12px 12px;padding:24px 28px}
+.pane h2{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.pane h2 .h2s{font:400 13px var(--sans);color:var(--mut)}
+#filt{padding:0;margin-bottom:6px}
+
 /* 篩選列、紀錄、對話框 */
-.filt{padding:12px 14px}
-.filt input[type=search]{flex:1;min-width:180px;width:auto}
-.filt label{font-size:13.5px;display:flex;gap:6px;align-items:center;color:var(--mut)}
+/* 篩選列：和頂端工具列同高、同字級 */
+.filt{padding:12px 14px;gap:8px;flex-wrap:nowrap}
+.filt>*{height:40px;font-size:13px;line-height:1.2;flex-shrink:0}
+.filt input[type=search]{flex:1 1 auto;min-width:160px;width:auto;padding:0 14px}
+.filt select{-webkit-appearance:none;appearance:none;width:150px;padding:0 32px 0 14px;text-overflow:ellipsis;cursor:pointer;
+ background:var(--well) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239B9B9B' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right 14px center}
+.filt select option{background:var(--card2);color:var(--fg)}
+.filt label{display:flex;gap:8px;align-items:center;color:var(--mut);padding:0 6px;white-space:nowrap}
+.filt label input{margin:0;width:15px;height:15px}
+.filt button{padding:0 18px;white-space:nowrap}
+@media(max-width:1024px){.filt{flex-wrap:wrap}.filt input[type=search]{flex-basis:100%}}
 .log{list-style:none;padding:0;margin:8px 0 0;font-size:13px}
 .log li{padding:6px 0;border-bottom:1px solid var(--line)}
 dialog{background:var(--card2);color:var(--fg);border:1px solid var(--line2);border-radius:12px;padding:20px;width:min(420px,calc(100vw - 32px))}
@@ -154,6 +182,15 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 
 @media(max-width:640px){
  .w{padding:44px 16px 32px}
+ .filt{flex-wrap:wrap}
+ .filt input[type=search]{flex-basis:100%}
+ .filt select{flex:1 1 0;width:auto;min-width:0}
+ .tab{padding:12px 8px;font-size:12.5px;gap:5px;flex-wrap:wrap}
+ .tab .n{font-size:12.5px}
+ .tab .dot{width:6px;height:6px}
+ .pane{padding:16px 14px}
+ .secs{grid-template-columns:1fr 1fr;gap:10px}
+ button.sc-card{padding:12px}
  .toolbar>*{padding:0 6px;font-size:12.5px}
  select.btnsel{padding:0 18px 0 6px;background-position:right 7px center;font-size:12.5px}
  .hd{margin-bottom:28px}
@@ -272,16 +309,23 @@ export default {
   <div id="note" class="note"></div>
   <div id="focus"></div>
   <div id="stats"></div>
-  <div id="secs"></div>
-  <div class="card filt row" id="filt">
-    <input type="search" id="fq" placeholder="搜尋代號、名稱或標籤" aria-label="搜尋">
-    <select id="fg" aria-label="群組"></select>
-    <select id="ft" aria-label="標籤"></select>
-    <label><input type="checkbox" id="fh"> 只看有持倉</label>
-    <button class="g s" id="fclr">清除篩選</button>
+  <div class="panel" id="panel">
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="pane">
+      <div id="secs"></div>
+      <div id="sigwrap">
+        <div class="filt row" id="filt">
+          <input type="search" id="fq" placeholder="搜尋代號、名稱或標籤" aria-label="搜尋">
+          <select id="fg" aria-label="群組"></select>
+          <select id="ft" aria-label="標籤"></select>
+          <label><input type="checkbox" id="fh"> 只看有持倉</label>
+          <button class="g" id="fclr">清除篩選</button>
+        </div>
+        <div class="sum" id="sum"></div>
+        <div id="out"></div>
+      </div>
+    </div>
   </div>
-  <div class="sum" id="sum"></div>
-  <div id="out"></div>
 </div>
 <footer class="ft">
   <p class="s">此工具提供的是規則化的提示，不是投資建議。群組量能來自 CoinMarketCap 的 24H 成交量變化（CoinGecko 補上的幣沒有這項，不計入）；換手率基準來自你的觀察名單。</p>
@@ -469,7 +513,7 @@ const ls={
 const ROW={sym:"",name:"",id:"",cg:"",sector:"",tags:"",leader:"",qty:"",cost:"",target:"",free:false};
 const defRows=()=>LIST.map(([sym,name,id,cg,sector,tags])=>({...ROW,sym,name,id:String(id),cg,sector,tags:tags.split("|").filter(Boolean).join(", ")}));
 const DEF={worker:"",key:"",cgKey:"",demo:false,p1:25,p2:25,p3:60,p4:3,p5:5000000,p6:10,target:0,pool:0,auto:0,log:[],
- listVer:LIST_VER,groups:{...GROUPS},ui:{q:"",group:"",tag:"",held:false},rows:defRows()};
+ listVer:LIST_VER,groups:{...GROUPS},ui:{q:"",group:"",tag:"",held:false,tab:"secs"},rows:defRows()};
 const PK=["p1","p2","p3","p4","p5","p6","target","pool"];
 const fresh=()=>JSON.parse(JSON.stringify(DEF));
 const keepHold=(rows,old)=>{const m=Object.fromEntries(old.map(r=>[r.sym,r]));return rows.map(r=>{const o=m[r.sym];return o?{...r,qty:o.qty||"",cost:o.cost||"",target:o.target||"",free:!!o.free}:r})};
@@ -503,7 +547,7 @@ const COLR={red:"var(--red)",grn:"var(--grn)",gry:"var(--gry)"};
 const SYM_RE=/^[A-Z0-9.$_-]+$/;
 
 // ---------- 狀態 ----------
-let cfg=load(),Q=null,Qt=0,busy=false,timer=null,items=[],sortBy={k:"c7",dir:-1},T=null,grayOpen=false;
+let cfg=load(),Q=null,Qt=0,busy=false,timer=null,items=[],sortBy={k:"c7",dir:-1},T=null;
 save();
 const setOpen=()=>!$("set").classList.contains("hid");
 const groupOf=r=>r.sector||"未分類";
@@ -924,7 +968,7 @@ function render(){
  renderFocus(A);renderStats(A);renderSecs(A);renderFilters(A);renderSignals(A);
 }
 
-const MK={grn:"var(--grn)",yel:"var(--yel)",red:"var(--red)",mid:"var(--gry)"};
+const MK={grn:"var(--grn)",yel:"var(--yel)",red:"var(--red)",mid:"var(--fg)"};
 function renderFocus(A){
  const F=A.focus,m=F.mkt;
  const secBtn=s=>`<button class="link big" data-fg="${esc(s.name)}" title="只看這個群組">${esc(s.name)}</button>`;
@@ -943,15 +987,15 @@ function renderFocus(A){
  $("focus").innerHTML=`<div class="card focus" style="--c:${MK[m.k]}">
   <div class="mk"><div class="lbl">市場狀態</div><div class="mk-t"><i class="dot"></i><b>${m.t}</b></div>${m.nums?`<div class="nums">${m.nums}</div>`:""}<p>${m.d}</p></div>
   <div class="fgrid">
-   <div class="fbox"><h3>建議觀察的板塊</h3>${watch}</div>
-   <div class="fbox"><h3>${F.buyAlt?"還沒有綠燈，觀察板塊裡換手最高的幣":"依你的規則，目前最符合的買進候選"}</h3>${buys}</div>
+   <div class="fbox"><h3>建議觀察的板塊</h3><div class="picks">${watch}</div></div>
+   <div class="fbox"><h3>${F.buyAlt?"還沒有綠燈，觀察板塊裡換手最高的幣":"依你的規則，目前最符合的買進候選"}</h3><div class="picks">${buys}</div></div>
   </div>${sells}
   <p class="hint" style="margin-top:10px">由規則自動算出，不是投資建議；規則尚未回測，市場狀態只是提醒、不會影響候選。</p>
  </div>`;
 }
 $("focus").addEventListener("click",e=>{
  const g=e.target.closest("[data-fg]");
- if(g){cfg.ui={q:"",group:g.dataset.fg,tag:"",held:false};save();renderSecs(lastA);renderFilters(lastA);renderSignals(lastA);$("filt").scrollIntoView({behavior:"smooth"});return}
+ if(g){goGroup(g.dataset.fg,true);$("panel").scrollIntoView({behavior:"smooth"});return}
  const t=e.target.closest("[data-trade]");if(t)openTrade(+t.dataset.trade);
 });
 
@@ -982,19 +1026,27 @@ function renderSecs(A){
  if(!A.secs.length){$("secs").innerHTML="";return}
  const span=Math.max(20,...A.secs.map(s=>Math.abs(s.m7)));
  const noVol=A.secs.every(s=>!ok(s.vc));
- $("secs").innerHTML=`<div class="card"><h2>群組總覽</h2><p class="s" style="margin:2px 0 0">長條是群組 7 日中位數，以 0 為中線；各群組的基準是 ${sg(A.MS)}%。低於基準、且 24H 量成長 ≥ ${cfg.p6}% 的群組標為資金流入，綠燈只從這些群組裡挑。點卡片可以只看該群組。${noVol?"<br><b>目前沒有 24H 量變化資料（CMC 未回應），資金流入無法判斷。</b>":""}</p><div class="secs">`+
+ $("secs").innerHTML=`<h2>群組總覽</h2><p class="s" style="margin:2px 0 0">長條是群組 7 日中位數，以 0 為中線；各群組的基準是 ${sg(A.MS)}%。低於基準、且 24H 量成長 ≥ ${cfg.p6}% 的群組標為資金流入，綠燈只從這些群組裡挑。點卡片可以只看該群組。${noVol?"<br><b>目前沒有 24H 量變化資料（CMC 未回應），資金流入無法判斷。</b>":""}</p><div class="secs">`+
   [...A.secs].sort((a,b)=>b.m7-a.m7).map(s=>{
    const [lab,c]=SEC[s.st],w=Math.min(50,Math.abs(s.m7)/span*50),on=cfg.ui.group===s.name;
    return `<button class="sc-card" style="--c:${c}" data-g="${esc(s.name)}" aria-pressed="${on}"><span class="row" style="justify-content:space-between"><b>${esc(s.name)}</b><span class="tag" style="color:${c}">${lab}</span></span>`+
     `<span class="bar" style="display:block" role="img" aria-label="7 日中位 ${sg(s.m7)}%"><i style="left:${s.m7>=0?50:50-w}%;width:${w}%"></i></span>`+
     `<span class="m" style="display:block">7 日中位 ${pc(s.m7)}・24H 量 ${ok(s.vc)?pc(s.vc):"-"}</span><span class="m" style="display:block">換手中位 ${s.mt.toFixed(1)}%・${s.n} 檔</span></button>`;
-  }).join("")+`</div></div>`;
+  }).join("")+`</div>`;
 }
 $("secs").addEventListener("click",e=>{
  const b=e.target.closest("[data-g]");if(!b)return;
- cfg.ui.group=cfg.ui.group===b.dataset.g?"":b.dataset.g;save();
- renderSecs(lastA);renderFilters(lastA);renderSignals(lastA);
+ goGroup(b.dataset.g,false);
 });
+// 套用群組篩選，並跳到該群組有幣的燈號分頁（窪地 > 過熱 > 觀望）；toggle=false 時再點一次會取消
+function goGroup(g,force){
+ if(!force&&cfg.ui.group===g){cfg.ui.group="";save();renderAll();return}
+ Object.assign(cfg.ui,{q:"",group:g,tag:"",held:false});
+ const has=k=>items.some(x=>x.st===k&&groupOf(x.r)===g);
+ cfg.ui.tab=["grn","red","gry"].find(has)||"gry";
+ save();renderAll();
+}
+const renderAll=()=>{if(lastA){renderSecs(lastA);renderFilters(lastA);renderSignals(lastA)}};
 
 function renderFilters(A){
  const groups=[...new Set(cfg.rows.map(groupOf))];
@@ -1006,9 +1058,9 @@ function renderFilters(A){
  if(document.activeElement!==$("fq"))$("fq").value=cfg.ui.q;
  $("fh").checked=cfg.ui.held;
 }
-const onFilter=()=>{cfg.ui={q:$("fq").value,group:$("fg").value,tag:$("ft").value,held:$("fh").checked};save();if(lastA){renderSecs(lastA);renderSignals(lastA)}};
+const onFilter=()=>{Object.assign(cfg.ui,{q:$("fq").value,group:$("fg").value,tag:$("ft").value,held:$("fh").checked});save();if(lastA){renderSecs(lastA);renderSignals(lastA)}};
 ["fq","fg","ft","fh"].forEach(id=>$(id).addEventListener(id==="fq"?"input":"change",onFilter));
-$("fclr").onclick=()=>{cfg.ui={q:"",group:"",tag:"",held:false};save();if(lastA){renderSecs(lastA);renderFilters(lastA);renderSignals(lastA)}};
+$("fclr").onclick=()=>{Object.assign(cfg.ui,{q:"",group:"",tag:"",held:false});save();renderAll()};
 function pass(x){
  const u=cfg.ui,q=u.q.trim().toLowerCase();
  if(u.group&&groupOf(x.r)!==u.group)return false;
@@ -1030,17 +1082,19 @@ function renderSignals(A){
  const G={red:[],grn:[],gry:[]};
  A.items.forEach((x,i)=>{x.i=i;if(pass(x))G[x.st].push(x)});
  const shown=G.red.length+G.grn.length+G.gry.length,filtered=shown<A.items.length;
- $("sum").innerHTML=`<div><b style="color:var(--red)">${G.red.length}</b> <span class="mut">過熱</span></div><div><b style="color:var(--grn)">${G.grn.length}</b> <span class="mut">窪地</span></div><div><b style="color:var(--gry)">${G.gry.length}</b> <span class="mut">觀望</span></div><div><span class="mut">名單 7 日中位數</span> <b>${A.M7.toFixed(1)}%</b></div>`+(filtered?`<div class="mut" style="font-size:13px">篩選中：顯示 ${shown} / ${A.items.length} 檔</div>`:"");
  const meta=[["red","過熱區","準備收回本金"],["grn","窪地區","適合利潤加倉"],["gry","觀望區","流動性不足或無動能"]];
+ const tab=["secs","red","grn","gry"].includes(cfg.ui.tab)?cfg.ui.tab:"secs";
+ $("tabs").innerHTML=`<button class="tab" role="tab" data-tab="secs" aria-selected="${tab==="secs"}">群組總覽<span class="n">${A.secs.length}</span></button>`+
+  meta.map(([k,t0])=>`<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab===k}" style="--c:${COLR[k]}"><i class="dot"></i>${t0}<span class="n">${G[k].length}</span></button>`).join("");
+ $("secs").style.display=tab==="secs"?"":"none";
+ $("sigwrap").style.display=tab==="secs"?"none":"";
+ $("sum").innerHTML=`<div><span class="mut">名單 7 日中位數</span> <b>${A.M7.toFixed(1)}%</b></div>`+(filtered?`<div class="mut" style="font-size:13px">篩選中：顯示 ${shown} / ${A.items.length} 檔</div>`:"");
+ if(tab==="secs"){$("out").innerHTML="";return}
  const head=`<tr class="h">`+TC.map(([k,l,left])=>`<th${left?" class=l":""} aria-sort="${sortBy.k===k?(sortBy.dir<0?"descending":"ascending"):"none"}"><button class="th" data-s="${k}">${l}${sortBy.k===k?(sortBy.dir<0?" ↓":" ↑"):""}</button></th>`).join("")+`<th class=l>依據與建議</th></tr>`;
  const table=list=>`<div class="sc"><table>${head}`+list.sort(cmp).map(rowHTML).join("")+`</table></div>`;
- $("out").innerHTML=meta.map(([k,t0,sub])=>{
-  const t=`<i class="dot"></i>${t0}<span class="h2s">${sub}</span>`;
-  const list=G[k],body=list.length?table(list):'<p class="mut" style="margin:8px 0 0">目前沒有標的。</p>';
-  // 觀望區通常最多，預設收合
-  if(k==="gry")return `<details class="card sec" id="gray" style="--c:${COLR[k]}"${grayOpen?" open":""}><summary><h2>${t}</h2> <span class="mut" style="font-size:13px">　${list.length} 檔・點開查看</span></summary>${body}</details>`;
-  return `<div class="card sec" style="--c:${COLR[k]}"><h2>${t}</h2>${body}</div>`;
- }).join("");
+ const [k,t0,sub]=meta.find(m=>m[0]===tab),list=G[k];
+ $("out").innerHTML=`<div style="--c:${COLR[k]}"><h2><i class="dot"></i>${t0}<span class="h2s">${sub}</span></h2>`+
+  (list.length?table(list):'<p class="mut" style="margin:12px 0 0">目前沒有標的。</p>')+`</div>`;
 }
 function rowHTML(x){
  const tag=x.fresh?`<span class="tag" style="color:${COLR[x.st]}" title="${new Date(x.since).toLocaleString()}">新・原${ST[x.prev]}・${ago(x.since)}</span>`:"";
@@ -1054,7 +1108,7 @@ function rowHTML(x){
   `<td data-l="持倉">${x.qty?usd(x.val):"-"}</td><td data-l="損益">${x.isFree?'<span class="mut">淨利幣</span>':x.pnl==null?"-":pc(x.pnl)}</td>`+
   `<td class="act">${esc(x.why.join("；"))}<br><span class="mut">${esc(x.act)}</span> <button class="g s" data-trade="${x.i}">${btn}</button></td></tr>`;
 }
-$("out").addEventListener("toggle",e=>{if(e.target.id==="gray")grayOpen=e.target.open},true);
+$("tabs").addEventListener("click",e=>{const t=e.target.closest("[data-tab]");if(!t)return;cfg.ui.tab=t.dataset.tab;save();if(lastA)renderSignals(lastA)});
 $("out").addEventListener("click",e=>{
  const s=e.target.closest("[data-s]");
  if(s){const k=s.dataset.s;sortBy=sortBy.k===k?{k,dir:-sortBy.dir}:{k,dir:k==="sym"||k==="sector"?1:-1};if(lastA)renderSignals(lastA);return}
