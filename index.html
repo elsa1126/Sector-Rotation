@@ -75,6 +75,10 @@ th,td{padding:14px 16px;text-align:right;border-bottom:1px solid var(--line);whi
 td{font:13.5px/1.5 var(--sans)}
 th:first-child,td:first-child,td.l,th.l{text-align:left}
 td.act{white-space:normal;text-align:left;min-width:260px;font-size:13px;line-height:1.6}
+/* 記錄交易按鈕一律貼在儲存格最右邊、垂直置中 */
+.actw{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.actw>button,.actw>.btns{flex-shrink:0;white-space:nowrap;margin-left:auto}
+.btns{display:flex;flex-direction:column;gap:6px}
 th{color:var(--dim);font-weight:500;font-size:11.5px;letter-spacing:.1em}
 td.first b{font:700 17px/1.3 var(--sans);letter-spacing:.01em}
 button.th{background:none;border:0;padding:0;color:inherit;font:inherit;font-weight:inherit;letter-spacing:inherit;cursor:pointer}
@@ -291,7 +295,7 @@ export default {
     </div>
 
     <h2 style="margin-top:16px">群組與龍頭</h2>
-    <p class="s">龍頭用來比 FDV（小幣估值追到龍頭的幾 %）。龍頭可以不在名單裡（例如 BNB、TON、TAO 會自動抓報價）；留空則該群組不比 FDV。</p>
+    <p class="s">龍頭用來比 FDV（小幣估值追到龍頭的幾 %）。每組可填兩個，用逗號分隔，比較時以 FDV 較大的那個為準（第二個當參考）；本身是龍頭的幣不比。龍頭可以不在名單裡（例如 BNB、GRAM、TAO、ARB 會自動抓報價）；留空則該群組不比 FDV。</p>
     <div class="sc"><table class="set" id="gtab" style="min-width:420px"></table></div>
 
     <h2 style="margin-top:16px">觀察名單</h2>
@@ -302,9 +306,9 @@ export default {
     <div class="row" style="margin-top:10px"><button class="g" id="add">新增一列</button><button id="apply">儲存並重算</button><button class="g" id="reset">恢復內建名單</button></div>
 
     <h2 style="margin-top:16px">文字匯入 / 匯出</h2>
-    <p class="s">支援 CSV 或 JSON。CSV 欄位順序：代號,群組,龍頭,數量,成本價,淨利幣,目標倉位,標籤,CMC ID,CoinGecko ID,名稱（只有代號必填，可含標題列；標籤之間用 | 分隔）。JSON 匯出是完整備份（名單、群組、參數、利潤池與交易紀錄），用「取代名單」匯入即可還原。</p>
-    <textarea id="imp" rows="7" style="font-size:12.5px;line-height:1.6" placeholder="RENDER,AI,TAO&#10;WLD,AI,TAO,100,2.5&#10;或 JSON：[{&quot;sym&quot;:&quot;SOL&quot;,&quot;sector&quot;:&quot;主流公鏈&quot;}]"></textarea>
-    <div class="row" style="margin-top:8px"><button id="impAdd">加入名單</button><button class="g" id="impRep">取代名單</button><button class="g" id="expCsv">匯出 CSV</button><button class="g" id="expJson">匯出 JSON 備份</button></div>
+    <p class="s"><b>標準格式</b>（以 <code>觀察名單_2026-10-03_修正版.csv</code> 為準）：代幣代號、所屬板塊、板塊龍頭、持有數量、持倉成本、可用餘額、目標價、標籤、說明、ID、CoinGecko 代號、幣種全名，最後可再加網頁專用的「淨利幣」（1＝是）與「目標倉位」（USD），沒有這兩欄也能匯入。有標題列時依欄位名稱對應（舊的英文欄位也認得）；沒有標題列時就照上面的順序。龍頭可填兩個並用雙引號包住（例如 "ETH, SOL"），標籤之間用 | 分隔；檔案帶的龍頭會寫進群組設定。可以按「選擇檔案」讀入，或直接貼上文字；匯出後先在文字框預覽，按「下載」存成檔案。JSON 備份是完整備份（名單、群組、參數、利潤池與交易紀錄），用「取代名單」匯入即可還原。</p>
+    <textarea id="imp" rows="7" style="font-size:12.5px;line-height:1.6" placeholder="代幣代號,所屬板塊,板塊龍頭,持有數量,持倉成本,可用餘額,目標價,標籤,說明,ID,CoinGecko 代號,幣種全名&#10;ETH,主流公鏈,&quot;ETH, SOL&quot;,,,0,,以太坊,智能合約|EVM|PoS,1027,ethereum,Ethereum&#10;或 JSON：[{&quot;sym&quot;:&quot;SOL&quot;,&quot;sector&quot;:&quot;主流公鏈&quot;}]"></textarea>
+    <div class="row" style="margin-top:8px"><input type="file" id="impFile" accept=".csv,.json,.txt,text/csv,application/json" hidden><button class="g" id="impPick">選擇檔案</button><button id="impAdd">加入名單</button><button class="g" id="impRep">取代名單</button><button class="g" id="expCsv">匯出 CSV</button><button class="g" id="expJson">匯出 JSON 備份</button><button class="g" id="expDl">下載</button></div>
     <div id="impMsg" class="s" style="margin-top:6px"></div>
     <div class="row" style="margin-top:16px;border-top:1px solid var(--line);padding-top:12px"><button class="g" id="wipe">清除這台裝置的所有資料</button><span class="hint">名單、持倉、利潤池與交易紀錄都會刪除，建議先匯出 JSON 備份</span></div>
   </div>
@@ -355,155 +359,155 @@ export default {
 const $=id=>document.getElementById(id);
 
 // ---------- 內建名單 ----------
-// [代號, 名稱, CMC ID, CoinGecko ID, 群組, 標籤（| 分隔）]；ID 已逐一核對價格與名稱，避免同代號撞名
-const LIST_VER=2;
+// [代號, 名稱, CMC ID, CoinGecko ID, 群組, 標籤（| 分隔）, 說明]；ID 已逐一核對價格與名稱，避免同代號撞名
+const LIST_VER=3; // 3：2026-10-03 名單修正（ADA 移入老牌公鏈、標籤標準化、新增說明欄、每組兩個龍頭）
 const LIST=[
- ["ETH","Ethereum",1027,"ethereum","主流公鏈",""],
- ["SOL","Solana",5426,"solana","主流公鏈","Solana"],
- ["TRX","TRON",1958,"tron","主流公鏈","Tron"],
- ["ADA","Cardano",2010,"cardano","主流公鏈",""],
- ["NEAR","NEAR Protocol",6535,"near","主流公鏈",""],
- ["SUI","Sui",20947,"sui","主流公鏈",""],
- ["AVAX","Avalanche",5805,"avalanche-2","主流公鏈",""],
- ["HBAR","Hedera",4642,"hedera-hashgraph","主流公鏈",""],
- ["DOT","Polkadot",6636,"polkadot","主流公鏈","Polkadot"],
- ["ICP","Internet Computer",8916,"internet-computer","主流公鏈",""],
- ["ALGO","Algorand",4030,"algorand","主流公鏈",""],
- ["APT","Aptos",21794,"aptos","主流公鏈",""],
- ["SEI","Sei",23149,"sei-network","主流公鏈",""],
- ["PI","Pi",35697,"pi-network","老牌公鏈",""],
- ["FLR","Flare",7950,"flare-networks","老牌公鏈",""],
- ["CFX","Conflux",7334,"conflux-token","老牌公鏈",""],
- ["IOTA","IOTA",1720,"iota","老牌公鏈","DePIN"],
- ["A","Vaulta",36462,"vaulta","老牌公鏈",""],
- ["KAVA","Kava",4846,"kava","老牌公鏈","Cosmos"],
- ["ZIL","Zilliqa",2469,"zilliqa","老牌公鏈",""],
- ["VTHO","VeThor Token",3012,"vethor-token","老牌公鏈",""],
- ["CKB","Nervos Network",4948,"nervos-network","老牌公鏈",""],
- ["CSPR","Casper",5899,"casper-network","老牌公鏈",""],
- ["IOST","IOST",2405,"iostoken","老牌公鏈",""],
- ["ONE","Harmony",3945,"harmony","老牌公鏈",""],
- ["CHR","Chromia",3978,"chromaway","老牌公鏈",""],
- ["QKC","QuarkChain",2840,"quark-chain","老牌公鏈",""],
- ["POL","Polygon",28321,"polygon-ecosystem-token","L2 / 擴容",""],
- ["STX","Stacks",4847,"blockstack","L2 / 擴容","BTC 生態"],
- ["STRK","Starknet",22691,"starknet","L2 / 擴容",""],
- ["OP","Optimism",11840,"optimism","L2 / 擴容",""],
- ["ALT","Altlayer",29073,"altlayer","L2 / 擴容",""],
- ["SKL","SKALE",5691,"skale","L2 / 擴容",""],
- ["CTSI","Cartesi",5444,"cartesi","L2 / 擴容",""],
- ["LRC","Loopring",1934,"loopring","L2 / 擴容",""],
- ["ZEC","Zcash",1437,"zcash","PoW / 隱私","隱私"],
- ["LTC","Litecoin",2,"litecoin","PoW / 隱私",""],
- ["XEC","eCash",10791,"ecash","PoW / 隱私",""],
- ["DGB","DigiByte",109,"digibyte","PoW / 隱私",""],
- ["XVG","Verge",693,"verge","PoW / 隱私",""],
- ["XRP","XRP",52,"ripple","支付 / RWA",""],
- ["ZBCN","Zebec Network",30636,"zebec-network","支付 / RWA","Solana|RWA"],
- ["RSR","Reserve Rights",3964,"reserve-rights-token","支付 / RWA","RWA|穩定幣"],
- ["ACH","Alchemy Pay",6958,"alchemy-pay","支付 / RWA",""],
- ["DUSK","Dusk",4092,"dusk-network","支付 / RWA","隱私|RWA"],
- ["COTI","COTI",3992,"coti","支付 / RWA",""],
- ["MANTRA","MANTRA",39611,"mantra","支付 / RWA","RWA"],
- ["UNI","Uniswap",7083,"uniswap","DeFi",""],
- ["ENA","Ethena",30171,"ethena","DeFi","穩定幣"],
- ["CAKE","PancakeSwap",7186,"pancakeswap-token","DeFi","BNB 鏈"],
- ["RUNE","THORChain",4157,"thorchain","DeFi","Cosmos|跨鏈"],
- ["1INCH","1inch",8104,"1inch","DeFi",""],
- ["SUSHI","SushiSwap",6758,"sushi","DeFi",""],
- ["XVS","Venus",7288,"venus","DeFi","BNB 鏈"],
- ["KNC","Kyber Network Crystal v2",9444,"kyber-network-crystal","DeFi",""],
- ["SPELL","Spell Token",11289,"spell-token","DeFi",""],
- ["DODO","DODO",7224,"dodo","DeFi",""],
- ["JOE","JOE",11396,"joe","DeFi",""],
- ["MAV","Maverick Protocol",18037,"maverick-protocol","DeFi",""],
- ["BEL","Bella Protocol",6928,"bella-protocol","DeFi",""],
- ["HFT","Hashflow",22461,"hashflow","DeFi",""],
- ["IDEX","IDEX",3928,"aurora-dao","DeFi",""],
- ["HYPE","Hyperliquid",32196,"hyperliquid","Perp DEX","Perp"],
- ["ASTER","Aster",36341,"aster-2","Perp DEX","BNB 鏈|Perp"],
- ["AEVO","Aevo",29676,"aevo-exchange","Perp DEX","Perp"],
- ["CRO","Cronos",3635,"crypto-com-chain","平台幣 / Launchpad","交易所幣"],
- ["PUMP","Pump.fun",36507,"pump-fun","平台幣 / Launchpad","Solana|Launchpad"],
- ["HTX","HTX",29160,"htx-dao","平台幣 / Launchpad","Tron|交易所幣"],
- ["GT","GateToken",4269,"gatechain-token","平台幣 / Launchpad","交易所幣"],
- ["SFP","SafePal",8119,"safepal","平台幣 / Launchpad","BNB 鏈"],
- ["FORM","Four",23635,"four","平台幣 / Launchpad","BNB 鏈|Launchpad"],
- ["FTT","FTX Token",4195,"ftx-token","平台幣 / Launchpad","交易所幣|高風險"],
- ["WOO","WOO",7501,"woo-network","平台幣 / Launchpad","交易所幣"],
- ["C98","Coin98",10903,"coin98","平台幣 / Launchpad","BNB 鏈"],
- ["TKO","Toko Token",9020,"tokocrypto","平台幣 / Launchpad","BNB 鏈|交易所幣"],
- ["DOGE","Dogecoin",74,"dogecoin","Meme",""],
- ["SHIB","Shiba Inu",5994,"shiba-inu","Meme",""],
- ["PEPE","Pepe",24478,"pepe","Meme",""],
- ["PENGU","Pudgy Penguins",34466,"pudgy-penguins","Meme","Solana|NFT"],
- ["TRUMP","OFFICIAL TRUMP",35336,"official-trump","Meme","Solana|政治"],
- ["BONK","Bonk",23095,"bonk","Meme","Solana"],
- ["FLOKI","FLOKI",10804,"floki","Meme",""],
- ["TURBO","Turbo",24911,"turbo","Meme",""],
- ["BABYDOGE","Baby Doge Coin",10407,"baby-doge-coin","Meme","BNB 鏈"],
- ["BOME","BOOK OF MEME",29870,"book-of-meme","Meme","Solana"],
- ["BAN","Comedian",33881,"comedian","Meme","Solana"],
- ["PNUT","Peanut the Squirrel",33788,"peanut-the-squirrel","Meme","Solana"],
- ["PEOPLE","ConstitutionDAO",14806,"constitutiondao","Meme","政治"],
- ["NEIRO","Neiro",32521,"neiro-3","Meme",""],
- ["MEME","Memecoin",28301,"memecoin-2","Meme",""],
- ["SATS","SATS (Ordinals)",28194,"sats-ordinals","Meme","BTC 生態"],
- ["WEN","Wen",29175,"wen-4","Meme","Solana"],
- ["RATS","rats (Ordinals)",28452,"rats","Meme","BTC 生態"],
- ["NOT","Notcoin",28850,"notcoin","TON 生態","TON|Tap-to-earn"],
- ["DOGS","DOGS",32698,"dogs-2","TON 生態","TON|Tap-to-earn"],
- ["HMSTR","Hamster Kombat",32195,"hamster-kombat","TON 生態","TON|Tap-to-earn"],
- ["WLD","Worldcoin",13502,"worldcoin-wld","AI","AI"],
- ["FET","Artificial Superintelligence Alliance",3773,"fetch-ai","AI","AI"],
- ["NFT","AINFT",9816,"apenft","AI","Tron|AI"],
- ["AWE","AWE",4006,"stp-network","AI","AI"],
- ["IO","io.net",29835,"io","AI","Solana|AI|DePIN"],
- ["PHA","Phala Network",6841,"pha","AI","Polkadot|AI|隱私"],
- ["AI","Gensyn",39883,"gensyn","AI","AI"],
- ["IQ","IQ",2930,"everipedia","AI","AI"],
- ["GOAT","Goatseus Maximus",33440,"goatseus-maximus","AI","Solana|AI|AI Meme"],
- ["ARPA","ARPA",4039,"arpa","AI","AI"],
- ["ACT","Act I : The AI Prophecy",33566,"act-i-the-ai-prophecy","AI","Solana|AI|AI Meme"],
- ["IMX","Immutable",10603,"immutable-x","GameFi / NFT",""],
- ["AXS","Axie Infinity",6783,"axie-infinity","GameFi / NFT",""],
- ["MANA","Decentraland",1966,"decentraland","GameFi / NFT",""],
- ["SAND","The Sandbox",6210,"the-sandbox","GameFi / NFT",""],
- ["APE","ApeCoin",18876,"apecoin","GameFi / NFT","NFT"],
- ["GALA","Gala",7080,"gala","GameFi / NFT",""],
- ["ENJ","Enjin Coin",2130,"enjincoin","GameFi / NFT",""],
- ["BLUR","Blur",23121,"blur","GameFi / NFT","NFT"],
- ["WAXP","WAX",2300,"wax","GameFi / NFT",""],
- ["GMT","GMT",18069,"stepn","GameFi / NFT",""],
- ["YGG","Yield Guild Games",10688,"yield-guild-games","GameFi / NFT",""],
- ["PIXEL","Pixels",29335,"pixels","GameFi / NFT",""],
- ["XAI","Xai",28933,"xai-blockchain","GameFi / NFT",""],
- ["PORTAL","Portal",29555,"portal-2","GameFi / NFT",""],
- ["RARE","SuperRare",11294,"superrare","GameFi / NFT","NFT"],
- ["TLM","Alien Worlds",9119,"alien-worlds","GameFi / NFT",""],
- ["MBOX","MOBOX",9175,"mobox","GameFi / NFT",""],
- ["LINK","Chainlink",1975,"chainlink","基礎設施 / DePIN",""],
- ["PYTH","Pyth Network",28177,"pyth-network","基礎設施 / DePIN","Solana"],
- ["GRT","The Graph",6719,"the-graph","基礎設施 / DePIN",""],
- ["ENS","Ethereum Name Service",13855,"ethereum-name-service","基礎設施 / DePIN",""],
- ["JASMY","JasmyCoin",8425,"jasmycoin","基礎設施 / DePIN","DePIN"],
- ["THETA","Theta Network",2416,"theta-token","基礎設施 / DePIN","DePIN"],
- ["W","Wormhole",29587,"wormhole","基礎設施 / DePIN","Solana|跨鏈"],
- ["TFUEL","Theta Fuel",3822,"theta-fuel","基礎設施 / DePIN","DePIN"],
- ["ID","SPACE ID",21846,"space-id","基礎設施 / DePIN","BNB 鏈"],
- ["CVC","Civic",1816,"civic","基礎設施 / DePIN",""],
- ["CELR","Celer Network",3814,"celer-network","基礎設施 / DePIN","跨鏈"],
- ["POND","Marlin",7497,"marlin","基礎設施 / DePIN",""],
- ["NKN","NKN",2780,"nkn","基礎設施 / DePIN","DePIN"],
- ["LUNC","Terra Classic",4172,"terra-luna","粉絲 / 其他","高風險"],
- ["CHZ","Chiliz",4066,"chiliz","粉絲 / 其他",""],
- ["WIN","WINkLink",4206,"wink","粉絲 / 其他","Tron"],
- ["EDU","Open Campus",24613,"edu-coin","粉絲 / 其他",""],
- ["PSG","Paris Saint-Germain Fan Token",5226,"paris-saint-germain-fan-token","粉絲 / 其他",""],
- ["COS","Contentos",4036,"contentos","粉絲 / 其他",""]
+ ["ETH","Ethereum",1027,"ethereum","主流公鏈","以太坊","智能合約|EVM|PoS"],
+ ["SOL","Solana",5426,"solana","主流公鏈","Solana","Solana生態|高效能|PoH"],
+ ["TRX","TRON",1958,"tron","主流公鏈","Tron|支付|穩定幣","Tron生態|支付|穩定幣載體"],
+ ["NEAR","NEAR Protocol",6535,"near","主流公鏈","AI|分片","分片技術|AI結合"],
+ ["SUI","Sui",20947,"sui","主流公鏈","Move","Move語言|高效能"],
+ ["AVAX","Avalanche",5805,"avalanche-2","主流公鏈","Avalanche","Avalanche生態|EVM|子網"],
+ ["HBAR","Hedera",4642,"hedera-hashgraph","主流公鏈","企業級","DAG架構|企業級"],
+ ["DOT","Polkadot",6636,"polkadot","主流公鏈","Polkadot|跨鏈","Polkadot生態|跨鏈"],
+ ["ICP","Internet Computer",8916,"internet-computer","主流公鏈","","去中心化網路|雲端運算"],
+ ["ALGO","Algorand",4030,"algorand","主流公鏈","企業級","純PoS(PPoS)|機構級"],
+ ["APT","Aptos",21794,"aptos","主流公鏈","Move","Move語言|高效能"],
+ ["SEI","Sei",23149,"sei-network","主流公鏈","","交易優化|並行EVM"],
+ ["ADA","Cardano",2010,"cardano","老牌公鏈","","Cardano生態|PoS"],
+ ["PI","Pi",35697,"pi-network","老牌公鏈","","手機挖礦|社群驅動"],
+ ["FLR","Flare",7950,"flare-networks","老牌公鏈","預言機","預言機|EVM相容"],
+ ["CFX","Conflux",7334,"conflux-token","老牌公鏈","","香港概念|PoW+PoS混合"],
+ ["IOTA","IOTA",1720,"iota","老牌公鏈","DePIN","DePIN|物聯網|2025 年 Rebased 改為 Move 架構"],
+ ["A","Vaulta",36462,"vaulta","老牌公鏈","","智能合約|EOS 改名"],
+ ["KAVA","Kava",4846,"kava","老牌公鏈","Cosmos","Cosmos生態|DeFi中心"],
+ ["ZIL","Zilliqa",2469,"zilliqa","老牌公鏈","分片","分片技術(Sharding)"],
+ ["VTHO","VeThor Token",3012,"vethor-token","老牌公鏈","企業級","VeChain生態|Gas代幣"],
+ ["CKB","Nervos Network",4948,"nervos-network","老牌公鏈","BTC 生態|PoW","UTXO模型|BTC L2概念"],
+ ["CSPR","Casper",5899,"casper-network","老牌公鏈","企業級","企業級|PoS"],
+ ["IOST","IOST",2405,"iostoken","老牌公鏈","","PoB共識|高並發"],
+ ["ONE","Harmony",3945,"harmony","老牌公鏈","分片|跨鏈","分片技術|跨鏈"],
+ ["CHR","Chromia",3978,"chromaway","老牌公鏈","GameFi","關聯式資料庫|GameFi底層"],
+ ["QKC","QuarkChain",2840,"quark-chain","老牌公鏈","分片","狀態分片技術"],
+ ["POL","Polygon",28321,"polygon-ecosystem-token","L2 / 擴容","以太坊|ZK","ZK技術|Polygon生態"],
+ ["STX","Stacks",4847,"blockstack","L2 / 擴容","BTC 生態","BTC 生態|BTC L2"],
+ ["STRK","Starknet",22691,"starknet","L2 / 擴容","以太坊|ZK|Rollup","ZK Rollup"],
+ ["OP","Optimism",11840,"optimism","L2 / 擴容","以太坊|Rollup","Optimistic Rollup|超級鏈"],
+ ["ALT","Altlayer",29073,"altlayer","L2 / 擴容","Rollup","Restaked Rollup|EigenLayer生態"],
+ ["SKL","SKALE",5691,"skale","L2 / 擴容","以太坊","彈性側鏈|零Gas費"],
+ ["CTSI","Cartesi",5444,"cartesi","L2 / 擴容","Rollup","Linux VM|App-specific Rollup"],
+ ["LRC","Loopring",1934,"loopring","L2 / 擴容","ZK|Rollup|DEX","ZK Rollup|DEX"],
+ ["ZEC","Zcash",1437,"zcash","PoW / 隱私","隱私|PoW","隱私幣|PoW|零知識證明"],
+ ["LTC","Litecoin",2,"litecoin","PoW / 隱私","PoW|支付","PoW|數位白銀|支付"],
+ ["XEC","eCash",10791,"ecash","PoW / 隱私","PoW|支付","PoW|BCH分叉|支付"],
+ ["DGB","DigiByte",109,"digibyte","PoW / 隱私","PoW","PoW|多重演算法|高TPS"],
+ ["XVG","Verge",693,"verge","PoW / 隱私","PoW|隱私","PoW|隱私匿名"],
+ ["XRP","XRP",52,"ripple","支付 / RWA","支付|企業級","跨境支付|機構級"],
+ ["ZBCN","Zebec Network",30636,"zebec-network","支付 / RWA","Solana|RWA|支付","Solana|RWA|流支付"],
+ ["RSR","Reserve Rights",3964,"reserve-rights-token","支付 / RWA","RWA|穩定幣","RWA|穩定幣|抗通膨"],
+ ["ACH","Alchemy Pay",6958,"alchemy-pay","支付 / RWA","支付","法幣入金|加密支付通道"],
+ ["DUSK","Dusk",4092,"dusk-network","支付 / RWA","隱私|RWA","隱私|RWA|證券型代幣"],
+ ["COTI","COTI",3992,"coti","支付 / RWA","支付|隱私","企業級支付|隱私層(V2)"],
+ ["MANTRA","MANTRA",39611,"mantra","支付 / RWA","Cosmos|RWA","RWA|Cosmos生態"],
+ ["UNI","Uniswap",7083,"uniswap","DeFi","以太坊|DEX","DEX龍頭|AMM"],
+ ["ENA","Ethena",30171,"ethena","DeFi","穩定幣","穩定幣|衍生品|收益協議"],
+ ["CAKE","PancakeSwap",7186,"pancakeswap-token","DeFi","BNB 鏈|DEX","BNB 鏈|DEX"],
+ ["RUNE","THORChain",4157,"thorchain","DeFi","Cosmos|DEX|跨鏈","Cosmos|跨鏈流動性|DEX"],
+ ["1INCH","1inch",8104,"1inch","DeFi","DEX","DEX聚合器"],
+ ["SUSHI","SushiSwap",6758,"sushi","DeFi","DEX","DEX|多鏈部署"],
+ ["XVS","Venus",7288,"venus","DeFi","BNB 鏈|借貸","BNB 鏈|借貸市場"],
+ ["KNC","Kyber Network Crystal v2",9444,"kyber-network-crystal","DeFi","DEX","DEX|流動性協議"],
+ ["SPELL","Spell Token",11289,"spell-token","DeFi","穩定幣|借貸","穩定幣(MIM)|借貸"],
+ ["DODO","DODO",7224,"dodo","DeFi","DEX","DEX|主動做市商(PMM)"],
+ ["JOE","JOE",11396,"joe","DeFi","Avalanche|DEX","Avalanche生態|DEX"],
+ ["MAV","Maverick Protocol",18037,"maverick-protocol","DeFi","DEX","DEX|動態集中流動性"],
+ ["BEL","Bella Protocol",6928,"bella-protocol","DeFi","","資產管理|收益聚合"],
+ ["HFT","Hashflow",22461,"hashflow","DeFi","DEX","DEX|無滑點交易"],
+ ["IDEX","IDEX",3928,"aurora-dao","DeFi","DEX","訂單簿DEX"],
+ ["HYPE","Hyperliquid",32196,"hyperliquid","Perp DEX","Perp","Perp|L1應用鏈"],
+ ["ASTER","Aster",36341,"aster-2","Perp DEX","BNB 鏈|Perp","BNB 鏈|Perp"],
+ ["AEVO","Aevo",29676,"aevo-exchange","Perp DEX","Perp|Rollup","Perp|期權|L2 Rollup"],
+ ["CRO","Cronos",3635,"crypto-com-chain","平台幣 / Launchpad","Cosmos|交易所幣","交易所幣|Cosmos生態"],
+ ["PUMP","Pump.fun",36507,"pump-fun","平台幣 / Launchpad","Solana|Launchpad","Solana|Launchpad|Meme發射平台"],
+ ["HTX","HTX",29160,"htx-dao","平台幣 / Launchpad","Tron|交易所幣","Tron|交易所幣"],
+ ["GT","GateToken",4269,"gatechain-token","平台幣 / Launchpad","交易所幣","交易所幣|公鏈"],
+ ["SFP","SafePal",8119,"safepal","平台幣 / Launchpad","BNB 鏈|錢包","BNB 鏈|硬體錢包"],
+ ["FORM","Four",23635,"four","平台幣 / Launchpad","BNB 鏈|Launchpad","BNB 鏈|Launchpad"],
+ ["FTT","FTX Token",4195,"ftx-token","平台幣 / Launchpad","交易所幣|高風險","交易所幣|高風險|破產重組"],
+ ["WOO","WOO",7501,"woo-network","平台幣 / Launchpad","交易所幣","交易所幣|全鏈流動性"],
+ ["C98","Coin98",10903,"coin98","平台幣 / Launchpad","BNB 鏈|錢包","BNB 鏈|多鏈錢包|DeFi"],
+ ["TKO","Toko Token",9020,"tokocrypto","平台幣 / Launchpad","BNB 鏈|交易所幣","BNB 鏈|交易所幣(印尼)"],
+ ["DOGE","Dogecoin",74,"dogecoin","Meme","PoW","Meme龍頭|PoW"],
+ ["SHIB","Shiba Inu",5994,"shiba-inu","Meme","以太坊","動物系|以太坊Meme"],
+ ["PEPE","Pepe",24478,"pepe","Meme","以太坊","青蛙系|以太坊Meme"],
+ ["PENGU","Pudgy Penguins",34466,"pudgy-penguins","Meme","Solana|NFT","Solana|NFT IP轉化"],
+ ["TRUMP","OFFICIAL TRUMP",35336,"official-trump","Meme","Solana|政治","Solana|政治(PolitiFi)"],
+ ["BONK","Bonk",23095,"bonk","Meme","Solana","Solana生態龍頭Meme"],
+ ["FLOKI","FLOKI",10804,"floki","Meme","GameFi","動物系|GameFi結合"],
+ ["TURBO","Turbo",24911,"turbo","Meme","以太坊|AI Meme","AI生成Meme"],
+ ["BABYDOGE","Baby Doge Coin",10407,"baby-doge-coin","Meme","BNB 鏈","BNB 鏈|動物系"],
+ ["BOME","BOOK OF MEME",29870,"book-of-meme","Meme","Solana","Solana|藝術Meme"],
+ ["BAN","Comedian",33881,"comedian","Meme","Solana","Solana|藝術Meme"],
+ ["PNUT","Peanut the Squirrel",33788,"peanut-the-squirrel","Meme","Solana","Solana|動物系(松鼠)"],
+ ["PEOPLE","ConstitutionDAO",14806,"constitutiondao","Meme","政治","政治(PolitiFi)|DAO"],
+ ["NEIRO","Neiro",32521,"neiro-3","Meme","以太坊","動物系|Doge關聯"],
+ ["MEME","Memecoin",28301,"memecoin-2","Meme","以太坊","9GAG關聯|SocialFi"],
+ ["SATS","SATS (Ordinals)",28194,"sats-ordinals","Meme","BTC 生態","BTC 生態|BRC-20"],
+ ["WEN","Wen",29175,"wen-4","Meme","Solana","Solana|Jupiter空投"],
+ ["RATS","rats (Ordinals)",28452,"rats","Meme","BTC 生態","BTC 生態|BRC-20"],
+ ["NOT","Notcoin",28850,"notcoin","TON 生態","TON|Tap-to-earn","TON|Tap-to-earn|全流通"],
+ ["DOGS","DOGS",32698,"dogs-2","TON 生態","TON|Tap-to-earn","TON|Tap-to-earn|Meme"],
+ ["HMSTR","Hamster Kombat",32195,"hamster-kombat","TON 生態","TON|Tap-to-earn|GameFi","TON|Tap-to-earn|GameFi"],
+ ["WLD","Worldcoin",13502,"worldcoin-wld","AI","AI|身分","AI|虹膜身分認證(DID)"],
+ ["FET","Artificial Superintelligence Alliance",3773,"fetch-ai","AI","AI","AI代理人網路|ASI聯盟"],
+ ["NFT","AINFT",9816,"apenft","AI","Tron|AI|NFT","Tron|AI|NFT基礎設施"],
+ ["AWE","AWE",4006,"stp-network","AI","AI","AI代理|自主世界引擎(原 STP Network)"],
+ ["IO","io.net",29835,"io","AI","Solana|AI|DePIN","Solana|AI|DePIN(去中心化算力)"],
+ ["PHA","Phala Network",6841,"pha","AI","Polkadot|AI|隱私","Polkadot|AI|隱私計算(TEE)"],
+ ["AI","Gensyn",39883,"gensyn","AI","AI","AI|算力網路"],
+ ["IQ","IQ",2930,"everipedia","AI","AI","AI|去中心化百科知識庫"],
+ ["GOAT","Goatseus Maximus",33440,"goatseus-maximus","AI","Solana|AI Meme","Solana|AI代理發幣|AI Meme"],
+ ["ARPA","ARPA",4039,"arpa","AI","隱私|預言機","多方安全計算(MPC)|鏈上隨機數(Randcast)"],
+ ["ACT","Act I : The AI Prophecy",33566,"act-i-the-ai-prophecy","AI","Solana|AI Meme","Solana|AI|AI Meme"],
+ ["IMX","Immutable",10603,"immutable-x","GameFi / NFT","以太坊|ZK|GameFi","ZK Rollup|GameFi專用鏈"],
+ ["AXS","Axie Infinity",6783,"axie-infinity","GameFi / NFT","Ronin|GameFi","Play-to-Earn|Ronin生態"],
+ ["MANA","Decentraland",1966,"decentraland","GameFi / NFT","元宇宙","元宇宙|虛擬地產"],
+ ["SAND","The Sandbox",6210,"the-sandbox","GameFi / NFT","元宇宙|GameFi","元宇宙|虛擬地產|UGC"],
+ ["APE","ApeCoin",18876,"apecoin","GameFi / NFT","NFT|元宇宙","NFT|Yuga Labs|元宇宙"],
+ ["GALA","Gala",7080,"gala","GameFi / NFT","GameFi","遊戲節點網路|區塊鏈遊戲平台"],
+ ["ENJ","Enjin Coin",2130,"enjincoin","GameFi / NFT","NFT|GameFi","NFT|遊戲道具與資產"],
+ ["BLUR","Blur",23121,"blur","GameFi / NFT","NFT","NFT交易所|流動性聚合器"],
+ ["WAXP","WAX",2300,"wax","GameFi / NFT","NFT|GameFi","NFT專用鏈|GameFi"],
+ ["GMT","GMT",18069,"stepn","GameFi / NFT","Solana|GameFi","Move-to-Earn|Solana生態"],
+ ["YGG","Yield Guild Games",10688,"yield-guild-games","GameFi / NFT","GameFi","遊戲公會|DAO"],
+ ["PIXEL","Pixels",29335,"pixels","GameFi / NFT","Ronin|GameFi","Ronin生態|農場經營遊戲"],
+ ["XAI","Xai",28933,"xai-blockchain","GameFi / NFT","GameFi|Rollup","Arbitrum L3|GameFi專用鏈"],
+ ["PORTAL","Portal",29555,"portal-2","GameFi / NFT","GameFi","跨鏈遊戲平台|分發中心"],
+ ["RARE","SuperRare",11294,"superrare","GameFi / NFT","NFT","NFT|數位藝術品市場"],
+ ["TLM","Alien Worlds",9119,"alien-worlds","GameFi / NFT","GameFi|元宇宙","元宇宙|Play-to-Earn"],
+ ["MBOX","MOBOX",9175,"mobox","GameFi / NFT","BNB 鏈|GameFi","GameFi|DeFi|BNB 鏈"],
+ ["LINK","Chainlink",1975,"chainlink","基礎設施 / DePIN","預言機","預言機龍頭"],
+ ["PYTH","Pyth Network",28177,"pyth-network","基礎設施 / DePIN","Solana|預言機","Solana|預言機"],
+ ["GRT","The Graph",6719,"the-graph","基礎設施 / DePIN","","去中心化索引(The Graph)"],
+ ["ENS","Ethereum Name Service",13855,"ethereum-name-service","基礎設施 / DePIN","以太坊|身分","Web3域名|以太坊生態"],
+ ["JASMY","JasmyCoin",8425,"jasmycoin","基礎設施 / DePIN","DePIN","DePIN|物聯網(IoT)|日本概念"],
+ ["THETA","Theta Network",2416,"theta-token","基礎設施 / DePIN","DePIN","DePIN|去中心化影音串流"],
+ ["W","Wormhole",29587,"wormhole","基礎設施 / DePIN","Solana|跨鏈","Solana|跨鏈橋協議"],
+ ["TFUEL","Theta Fuel",3822,"theta-fuel","基礎設施 / DePIN","DePIN","DePIN|Theta生態Gas代幣"],
+ ["ID","SPACE ID",21846,"space-id","基礎設施 / DePIN","BNB 鏈|身分","BNB 鏈|Web3域名"],
+ ["CVC","Civic",1816,"civic","基礎設施 / DePIN","身分","去中心化身分(DID)"],
+ ["CELR","Celer Network",3814,"celer-network","基礎設施 / DePIN","跨鏈","跨鏈橋|二層狀態通道"],
+ ["POND","Marlin",7497,"marlin","基礎設施 / DePIN","","L0網路加速|基礎設施"],
+ ["NKN","NKN",2780,"nkn","基礎設施 / DePIN","DePIN","DePIN|去中心化網路傳輸"],
+ ["LUNC","Terra Classic",4172,"terra-luna","粉絲 / 其他","高風險","高風險|Terra Classic"],
+ ["CHZ","Chiliz",4066,"chiliz","粉絲 / 其他","","粉絲代幣龍頭|體育公鏈"],
+ ["WIN","WINkLink",4206,"wink","粉絲 / 其他","Tron|預言機","Tron|博弈|預言機"],
+ ["EDU","Open Campus",24613,"edu-coin","粉絲 / 其他","","教育Web3|Binance Launchpad"],
+ ["PSG","Paris Saint-Germain Fan Token",5226,"paris-saint-germain-fan-token","粉絲 / 其他","","巴黎聖日耳曼粉絲代幣"],
+ ["COS","Contentos",4036,"contentos","粉絲 / 其他","","去中心化內容創作平台"]
 ];
-const GROUPS={"主流公鏈": "ETH", "老牌公鏈": "ADA", "L2 / 擴容": "", "PoW / 隱私": "ZEC", "支付 / RWA": "XRP", "DeFi": "UNI", "Perp DEX": "HYPE", "平台幣 / Launchpad": "BNB", "Meme": "DOGE", "TON 生態": "TON", "AI": "TAO", "GameFi / NFT": "", "基礎設施 / DePIN": "LINK", "粉絲 / 其他": ""}; // 群組 → 龍頭
-const EXTRA={BTC:[1,"bitcoin"],BNB:[1839,"binancecoin"],TON:[11419,"the-open-network"],TAO:[22974,"bittensor"]}; // 不在名單裡的龍頭與大盤基準
+const GROUPS={"主流公鏈": "ETH, SOL", "老牌公鏈": "ADA, PI", "L2 / 擴容": "ARB, POL", "PoW / 隱私": "XMR, ZEC", "支付 / RWA": "XRP, ONDO", "DeFi": "UNI, AAVE", "Perp DEX": "HYPE, ASTER", "平台幣 / Launchpad": "BNB, CRO", "Meme": "DOGE, SHIB", "TON 生態": "GRAM", "AI": "TAO, WLD", "GameFi / NFT": "IMX, SAND", "基礎設施 / DePIN": "LINK, FIL", "粉絲 / 其他": "CHZ"}; // 群組 → 龍頭（可兩個，逗號分隔；比 FDV 時以較大的為準）
+const EXTRA={BTC:[1,"bitcoin"],BNB:[1839,"binancecoin"],GRAM:[11419,"the-open-network"],TAO:[22974,"bittensor"],ARB:[11841,"arbitrum"],XMR:[328,"monero"],ONDO:[21159,"ondo-finance"],AAVE:[7278,"aave"],FIL:[2280,"filecoin"]}; // 不在名單裡的龍頭與大盤基準（一律用 ID 查：用代號查 TON 會拿到代幣化股票；Toncoin 已改名 GRAM）
 
 // ---------- 儲存 ----------
 const K="csr_cfg",QK="csr_quotes",LK="csr_last";
@@ -514,13 +518,13 @@ const ls={
 };
 ["csr_snap","csr_snap2"].forEach(k=>ls.del(k));
 
-const ROW={sym:"",name:"",id:"",cg:"",sector:"",tags:"",leader:"",qty:"",cost:"",target:"",free:false};
-const defRows=()=>LIST.map(([sym,name,id,cg,sector,tags])=>({...ROW,sym,name,id:String(id),cg,sector,tags:tags.split("|").filter(Boolean).join(", ")}));
+const ROW={sym:"",name:"",id:"",cg:"",sector:"",tags:"",note:"",leader:"",qty:"",cost:"",avail:"",tprice:"",target:"",free:false};
+const defRows=()=>LIST.map(([sym,name,id,cg,sector,tags,note])=>({...ROW,sym,name,id:String(id),cg,sector,tags:tags.split("|").filter(Boolean).join(", "),note:note||"",avail:"0"}));
 const DEF={worker:"",key:"",cgKey:"",demo:false,p1:25,p2:25,p3:60,p4:3,p5:5000000,p6:10,target:0,pool:0,auto:0,log:[],
  listVer:LIST_VER,groups:{...GROUPS},ui:{q:"",group:"",tag:"",held:false,tab:"secs"},rows:defRows()};
 const PK=["p1","p2","p3","p4","p5","p6","target","pool"];
 const fresh=()=>JSON.parse(JSON.stringify(DEF));
-const keepHold=(rows,old)=>{const m=Object.fromEntries(old.map(r=>[r.sym,r]));return rows.map(r=>{const o=m[r.sym];return o?{...r,qty:o.qty||"",cost:o.cost||"",target:o.target||"",free:!!o.free}:r})};
+const keepHold=(rows,old)=>{const m=Object.fromEntries(old.map(r=>[r.sym,r]));return rows.map(r=>{const o=m[r.sym];return o?{...r,qty:o.qty||"",cost:o.cost||"",avail:o.avail||r.avail,tprice:o.tprice||"",target:o.target||"",free:!!o.free}:r})};
 function load(){
  const saved=ls.get(K,{}),c=Object.assign(fresh(),saved);
  if(Object.keys(saved).length&&saved.listVer!==LIST_VER)c.listVer=0; // 舊版存檔沒有 listVer，要觸發名單升級
@@ -555,7 +559,9 @@ let cfg=load(),Q=null,Qt=0,busy=false,timer=null,items=[],sortBy={k:"c7",dir:-1}
 save();
 const setOpen=()=>!$("set").classList.contains("hid");
 const groupOf=r=>r.sector||"未分類";
-const leaderOf=r=>r.leader||cfg.groups[groupOf(r)]||"";
+// 龍頭可以有兩個（逗號分隔）
+const splitLeads=v=>String(v||"").split(/[,，、\s]+/).map(s=>s.trim().toUpperCase()).filter(Boolean);
+const leadersOf=r=>splitLeads(r.leader||cfg.groups[groupOf(r)]);
 
 function view(){
  const in_=cfg.demo||cfg.worker;
@@ -594,13 +600,13 @@ $("wipe").onclick=()=>{
 };
 
 // ---------- 設定表單 ----------
-const COLS=[["sym","代號","text"],["sector","群組","text"],["tags","標籤","text"],["id","CMC ID","text"],["qty","數量","number"],["cost","成本價","number"],["target","目標倉位","number"]];
+const COLS=[["sym","代號","text"],["sector","群組","text"],["tags","標籤","text"],["id","CMC ID","text"],["qty","數量","number"],["cost","成本價","number"],["avail","可用餘額","number"],["tprice","目標價","number"],["target","目標倉位","number"]];
 function fillSet(){
  PK.forEach(k=>$(k).value=cfg[k]);
  const groups=[...new Set(cfg.rows.map(groupOf))];
  $("glist").innerHTML=groups.map(g=>`<option value="${esc(g)}">`).join("");
  $("gtab").innerHTML=`<tr><th class=l>群組</th><th class=l>龍頭</th><th>檔數</th></tr>`+
-  groups.map(g=>`<tr><td class=l>${esc(g)}</td><td><input type=text data-g="${esc(g)}" value="${esc(cfg.groups[g]||"")}" aria-label="${esc(g)} 的龍頭" style="max-width:120px"></td><td>${cfg.rows.filter(r=>groupOf(r)===g).length}</td></tr>`).join("");
+  groups.map(g=>`<tr><td class=l>${esc(g)}</td><td><input type=text data-g="${esc(g)}" value="${esc(cfg.groups[g]||"")}" aria-label="${esc(g)} 的龍頭" style="max-width:180px"></td><td>${cfg.rows.filter(r=>groupOf(r)===g).length}</td></tr>`).join("");
  $("rows").innerHTML=`<tr>${COLS.map(([,l],i)=>`<th${i<4?" class=l":""}>${l}</th>`).join("")}<th>淨利幣</th><th></th></tr>`+
   cfg.rows.map((r,i)=>`<tr data-s="${esc([r.sym,r.name,r.sector,r.tags].join(" ").toLowerCase())}">${COLS.map(([k,l,t])=>`<td><input type=${t}${t==="number"?" step=any min=0":""}${k==="sector"?" list=glist":""} data-i=${i} data-k=${k} value="${esc(r[k])}" aria-label="${l}"${k==="tags"?' style="min-width:140px"':k==="sector"?' style="min-width:110px"':""}></td>`).join("")}<td style="text-align:center"><input type=checkbox data-i=${i} data-k=free ${r.free?"checked":""} aria-label="淨利幣"></td><td><button class=g data-del=${i} aria-label="刪除 ${esc(r.sym)}">✕</button></td></tr>`).join("");
  $("rows").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{readSet(false);cfg.rows.splice(+b.dataset.del,1);fillSet()});
@@ -613,7 +619,7 @@ function filterSet(){
 $("sf").oninput=filterSet;
 function readSet(prune=true){
  PK.forEach(k=>cfg[k]=num($(k).value));
- $("gtab").querySelectorAll("input[data-g]").forEach(el=>{cfg.groups[el.dataset.g]=el.value.trim().toUpperCase()});
+ $("gtab").querySelectorAll("input[data-g]").forEach(el=>{cfg.groups[el.dataset.g]=splitLeads(el.value).join(", ")});
  $("rows").querySelectorAll("input[data-k]").forEach(el=>{
   const r=cfg.rows[+el.dataset.i],k=el.dataset.k;if(!r)return;
   const v=el.type==="checkbox"?el.checked:el.value.trim();
@@ -628,27 +634,35 @@ function readSet(prune=true){
 }
 
 // ---------- 匯入 / 匯出 ----------
-const AL={sym:["sym","symbol","代號","代币","幣種","幣"],sector:["sector","group","群組","板塊","板块","category"],leader:["leader","龍頭","龙头"],qty:["qty","quantity","數量","数量","amount"],cost:["cost","成本","成本價","成本价","price"],free:["free","淨利幣","净利币","盡力幣","尽力币"],target:["target","目標","目標倉位","目标仓位"],tags:["tags","標籤","标签"],id:["id","cmc","cmc_id","cmc id"],cg:["cg","coingecko","cg_id","coingecko id"],name:["name","名稱","名称"]};
-const FK=["sym","sector","leader","qty","cost","free","target","tags","id","cg","name"];
+const AL={sym:["sym","symbol","代號","代币","幣種","幣","代幣代號"],sector:["sector","group","群組","板塊","板块","category","所屬板塊"],leader:["leader","龍頭","龙头","板塊龍頭"],qty:["qty","quantity","數量","数量","amount","持有數量"],cost:["cost","成本","成本價","成本价","price","持倉成本"],free:["free","淨利幣","净利币","盡力幣","尽力币"],avail:["avail","available","可用餘額","可用余额"],tprice:["tprice","target price","target_price","目標價","目标价"],target:["target","目標","目標倉位","目标仓位"],tags:["tags","標籤","标签","標籤 / 屬性"],note:["note","說明","说明","備註"],id:["id","cmc","cmc_id","cmc id"],cg:["cg","coingecko","cg_id","coingecko id","coingecko 代號"],name:["name","名稱","名称","幣種全名"]};
+// 標準格式欄位順序（以「觀察名單_2026-10-03_修正版.csv」為準）：前 12 欄＋網頁專用的淨利幣、目標倉位
+const FK=["sym","sector","leader","qty","cost","avail","tprice","tags","note","id","cg","name","free","target"];
+const STD_HEAD="代幣代號,所屬板塊,板塊龍頭,持有數量,持倉成本,可用餘額,目標價,標籤,說明,ID,CoinGecko 代號,幣種全名,淨利幣,目標倉位";
 const truthy=v=>v===true||/^(1|true|yes|y|是|v|✓|x)$/i.test(String(v||"").trim());
 function normRow(o){
  const r={...ROW};
  for(const k of FK){const key=Object.keys(o).find(x=>AL[k].includes(String(x).trim().toLowerCase())||AL[k].includes(String(x).trim()));if(key!==undefined)r[k]=o[key]}
  for(const k of ["sym","leader"])r[k]=String(r[k]||"").trim().toUpperCase();
- for(const k of ["sector","name","cg","qty","cost","target"])r[k]=r[k]==null?"":String(r[k]).trim();
+ for(const k of ["sector","name","cg","qty","cost","avail","tprice","target","note"])r[k]=r[k]==null?"":String(r[k]).trim();
+ r.leader=splitLeads(r.leader).join(", ");
  r.id=r.id==null||r.id===""?"":String(r.id).trim();
  r.tags=(Array.isArray(r.tags)?r.tags:String(r.tags||"").split(/[|,，]/)).map(s=>String(s).trim()).filter(Boolean).join(", ");
  r.free=truthy(r.free);return r;
 }
 function parseImport(t){
- t=t.trim();if(!t)return {list:[]};
+ t=t.replace(/^\uFEFF/,"").trim();if(!t)return {list:[]};
  if(t[0]==="["||t[0]==="{"){
   let j=JSON.parse(t),extra=null;
   if(!Array.isArray(j)){if(Array.isArray(j.rows)){extra=j;j=j.rows}else j=j.watchlist||Object.entries(j).map(([k,v])=>typeof v==="object"?{sym:k,...v}:{sym:k})}
   return {list:j.map(x=>typeof x==="string"?normRow({sym:x}):normRow(x)).filter(r=>r.sym),extra};
  }
  const lines=t.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
- const sp=l=>l.split(/\t|,|;/).map(c=>c.trim().replace(/^"|"$/g,""));
+ // 標準 CSV：支援雙引號包住含逗號的欄位（例如 "ETH, SOL"）；分隔符號依第一行自動判斷
+ const dl=lines[0].includes("\t")?"\t":lines[0].includes(",")?",":";";
+ const sp=l=>{const out=[];let cur="",q=false;for(let i=0;i<l.length;i++){const ch=l[i];
+  if(q){if(ch==='"'){if(l[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}
+  else if(ch==='"')q=true;else if(ch===dl){out.push(cur.trim());cur=""}else cur+=ch}
+  out.push(cur.trim());return out};
  let head=null;const first=sp(lines[0]);
  if(first.some(c=>Object.values(AL).some(a=>a.includes(c.toLowerCase())||a.includes(c)))){head=first;lines.shift()}
  return {list:lines.map(l=>{const c=sp(l);const o={};(head||FK).forEach((h,i)=>o[h]=c[i]!==undefined?c[i]:"");return normRow(o)}).filter(r=>r.sym&&SYM_RE.test(r.sym))};
@@ -660,7 +674,7 @@ function doImport(mode){
  if(!list.length){msg.textContent="沒有讀到任何幣種，請檢查格式。";return}
  // 內建名單裡有的代號，自動補上 ID 與名稱
  const known=Object.fromEntries(defRows().map(r=>[r.sym,r]));
- list.forEach(r=>{const k=known[r.sym];if(k){for(const f of ["id","cg","name","sector","tags"])if(!r[f])r[f]=k[f]}});
+ list.forEach(r=>{const k=known[r.sym];if(k){for(const f of ["id","cg","name","sector","tags","note"])if(!r[f])r[f]=k[f]}});
  let note="";
  if(mode==="rep"){
   cfg.rows=list;
@@ -672,20 +686,41 @@ function doImport(mode){
    note="，並還原參數、群組、利潤池與交易紀錄";
   }
  }else list.forEach(n=>{const i=cfg.rows.findIndex(r=>r.sym===n.sym);if(i>=0){FK.forEach(k=>{if(n[k]!==""&&n[k]!==false)cfg.rows[i][k]=n[k]})}else cfg.rows.push(n)});
- list.forEach(r=>{if(r.leader&&r.sector&&!cfg.groups[r.sector])cfg.groups[r.sector]=r.leader});
+ // 匯入檔帶的龍頭寫進群組設定（以檔案為準），每列不另外存
+ list.forEach(r=>{if(r.leader&&r.sector)cfg.groups[r.sector]=r.leader;r.leader=""});
  save();fillSet();render();
  msg.textContent=`已匯入 ${list.length} 筆${note}，目前名單共 ${cfg.rows.length} 筆。按「儲存並重算」抓新幣的報價。`;
+}
+const csvCell=v=>{v=String(v??"");return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+// 把文字存成檔案下載
+function download(name,text,type){
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;
+ document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
 }
 function doExport(fmt){
  readSet();
  const clean=cfg.rows;
- $("imp").value=fmt==="json"
+ const text=fmt==="json"
   ?JSON.stringify({version:3,params:Object.fromEntries(PK.filter(k=>k!=="pool").map(k=>[k,cfg[k]])),groups:cfg.groups,pool:cfg.pool,log:cfg.log,rows:clean},null,1)
-  :"sym,sector,leader,qty,cost,free,target,tags,id,cg,name\n"+clean.map(r=>[r.sym,r.sector,r.leader,r.qty,r.cost,r.free?1:0,r.target,tagList(r).join("|"),r.id,r.cg,String(r.name).replace(/[,;\t]/g," ")].join(",")).join("\n");
- $("impMsg").textContent="已輸出到上方文字框，可直接複製備份。";
+  :[STD_HEAD,...clean.map(r=>[r.sym,r.sector,leadersOf(r).join(", "),r.qty,r.cost,r.avail,r.tprice,tagList(r).join("|"),r.note,r.id,r.cg,r.name,r.free?1:"",r.target].map(csvCell).join(","))].join("\n");
+ $("imp").value=text;
+ $("impMsg").textContent="已輸出到上方文字框，可以先預覽；確認沒問題再按「下載」存成檔案。";
 }
+// 下載：把文字框目前的內容存成檔案（內容以 { 或 [ 開頭就存 JSON，否則存 CSV）
+function doDownload(){
+ const text=$("imp").value.trim(),day=new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD（本地時間）
+ if(!text){$("impMsg").textContent="文字框是空的，請先按「匯出 CSV」或「匯出 JSON 備份」預覽。";return}
+ const isJson=text[0]==="{"||text[0]==="[";
+ const name=isJson?`板塊輪動備份_${day}.json`:`觀察名單_${day}.csv`;
+ // CSV 開頭加 BOM，Excel／Numbers 打開中文才不會亂碼
+ if(isJson)download(name,text,"application/json");else download(name,"\uFEFF"+text,"text/csv;charset=utf-8");
+ $("impMsg").textContent=`已下載「${name}」。`;
+}
+// 從檔案匯入：讀進文字框，再按「加入名單」或「取代名單」
+$("impPick").onclick=()=>$("impFile").click();
+$("impFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;$("imp").value=(await f.text()).replace(/^\uFEFF/,"");$("impMsg").textContent=`已讀入「${f.name}」，請按「加入名單」或「取代名單」。`;e.target.value=""};
 $("impAdd").onclick=()=>doImport("add");$("impRep").onclick=()=>doImport("rep");
-$("expCsv").onclick=()=>doExport("csv");$("expJson").onclick=()=>doExport("json");
+$("expCsv").onclick=()=>doExport("csv");$("expDl").onclick=doDownload;$("expJson").onclick=()=>doExport("json");
 
 // ---------- 資料 ----------
 function meta(){
@@ -694,7 +729,7 @@ function meta(){
  for(const r of cfg.rows)if(r.sym)m[r.sym]={id:String(r.id||""),cg:r.cg||""};
  return m;
 }
-const symbols=()=>[...new Set(["BTC",...cfg.rows.flatMap(r=>[r.sym,leaderOf(r)])].filter(s=>s&&SYM_RE.test(s)))];
+const symbols=()=>[...new Set(["BTC",...cfg.rows.flatMap(r=>[r.sym,...leadersOf(r)])].filter(s=>s&&SYM_RE.test(s)))];
 
 const cmcH=()=>cfg.key?{"X-CMC_PRO_API_KEY":cfg.key}:{}; // 沒填就不送，讓 Worker 用 Secret
 async function getJSON(url,headers={}){
@@ -799,9 +834,11 @@ function analyze(){
  });
 
  const its=rows.map(r=>{
-  const q=Q[r.sym],s=S[groupOf(r)],t=turn(q),dev=q.c7-M7,lead=leaderOf(r);
-  const L=lead&&lead!==r.sym?Q[lead]:null;
-  const lf=L&&(L.fdv||L.mc),mf=q.fdv||q.mc;
+  const q=Q[r.sym],s=S[groupOf(r)],t=turn(q),dev=q.c7-M7,leads=leadersOf(r);
+  // 兩個龍頭時，跟 FDV 較大的那個（板塊真正的老大）比；本身就是龍頭的幣不比
+  let lead="",lf=0;
+  if(!leads.includes(r.sym))for(const l of leads){const L=Q[l],f=L&&(L.fdv||L.mc);if(f&&f>lf){lf=f;lead=l}}
+  const mf=q.fdv||q.mc;
   const fr=lf&&mf?mf/lf*100:null;
   const qty=num(r.qty),cost=num(r.cost),val=qty*q.price,principal=qty*cost;
   const isFree=r.free||(qty>0&&!cost&&r.cost!=="");
@@ -836,6 +873,13 @@ function analyze(){
     x.why.push("尚無明確訊號："+(!s.lag?"群組未落後":!s.inflow?`群組量能${ok(s.vc)?" "+sg(s.vc,0)+"%":"無資料"}未達流入門檻`:!inSec?"已高於群組中位":"換手率未放大"));
     x.act="觀察。";
    }
+  }
+  // 目標價：只提醒、不改燈號。到價時建議先收回本金；已是淨利幣就先賣一半
+  const tp=num(r.tprice);
+  if(tp>0){
+   x.tp=tp;x.tpGap=(tp/q.price-1)*100;x.tpHit=q.price>=tp;
+   if(x.tpHit&&qty>0)x.tpQty=isFree||!cost||q.price<=cost?qty/2:Math.min(qty,principal/q.price);
+   if(x.tpHit&&x.tpQty&&!x.trade)x.trade={side:"sell",qty:x.tpQty};
   }
   return x;
  });
@@ -888,7 +932,8 @@ function focus(its,secs,{M7,M24,MS,MT}){
   if(g){buys=its.filter(x=>x.s===g&&x.st!=="red").sort((a,b)=>b.t-a.t).slice(0,3);buyAlt=true}
  }
  const sells=its.filter(x=>x.st==="red"&&x.qty>0&&x.trade&&x.trade.side==="sell");
- return {mkt,watch,near,buys,buyAlt,sells};
+ const tps=its.filter(x=>x.tpHit).sort((a,b)=>b.qty*b.q.price-a.qty*a.q.price);
+ return {mkt,watch,near,buys,buyAlt,sells,tps};
 }
 
 // 記住每檔燈號，標出 24 小時內新轉紅／轉綠的標的
@@ -917,12 +962,13 @@ function tradeCalc(r,side,q,p){
  const spend=q*p,fromPool=Math.min(spend,Math.max(0,cfg.pool)),nq=qty+q;
  return {q,spend,fromPool,pd:-fromPool,back:0,nq,nc:(principal+spend)/nq,free:false};
 }
-function openTrade(i){
+function openTrade(i,tp){
  const x=items[i];if(!x)return;
  T={sym:x.r.sym};
+ const tr=tp&&x.tpQty?{side:"sell",qty:x.tpQty}:x.trade;
  $("dsym").textContent=x.r.sym;
- $("dside").value=x.trade?x.trade.side:x.qty?"sell":"buy";
- $("dq").value=x.trade&&x.trade.qty?+x.trade.qty.toPrecision(10):"";
+ $("dside").value=tr?tr.side:x.qty?"sell":"buy";
+ $("dq").value=tr&&tr.qty?+tr.qty.toPrecision(10):"";
  $("dp").value=+x.q.price.toPrecision(10);
  prevTrade();$("dlg").showModal();
 }
@@ -988,18 +1034,20 @@ function renderFocus(A){
  };
  const buys=F.buys.length?F.buys.map(buyLine).join(""):'<p class="mut" style="margin:4px 0">目前沒有符合條件的標的，先觀察就好。</p>';
  const sells=F.sells.length?`<p style="margin:12px 0 0;font-size:14px"><b style="color:var(--red)">該收回本金：</b>${F.sells.map(x=>`<button class="link" data-trade="${items.indexOf(x)}">${esc(x.r.sym)}</button>（賣約 ${fq(x.trade.qty)} 枚）`).join("、")}</p>`:"";
+ const tps=F.tps.length?`<p style="margin:12px 0 0;font-size:14px"><b style="color:var(--yel)">到目標價，提醒停利：</b>${F.tps.map(x=>x.tpQty?`<button class="link" data-tp="${items.indexOf(x)}">${esc(x.r.sym)}</button>（目標 ${px(x.tp)}，賣約 ${fq(x.tpQty)} 枚）`:`${esc(x.r.sym)}（目標 ${px(x.tp)}）`).join("、")}</p>`:"";
  $("focus").innerHTML=`<div class="card focus" style="--c:${MK[m.k]}">
   <div class="mk"><div class="lbl">市場狀態</div><div class="mk-t"><i class="dot"></i><b>${m.t}</b></div>${m.nums?`<div class="nums">${m.nums}</div>`:""}<p>${m.d}</p></div>
   <div class="fgrid">
    <div class="fbox"><h3>建議觀察的板塊</h3><div class="picks">${watch}</div></div>
    <div class="fbox"><h3>${F.buyAlt?"還沒有綠燈，觀察板塊裡換手最高的幣":"依你的規則，目前最符合的買進候選"}</h3><div class="picks">${buys}</div></div>
-  </div>${sells}
-  <p class="hint" style="margin-top:10px">由規則自動算出，不是投資建議；規則尚未回測，市場狀態只是提醒、不會影響候選。</p>
+  </div>${sells}${tps}
+  <p class="hint" style="margin-top:10px">由規則自動算出，不是投資建議；規則尚未回測，市場狀態只是提醒、不會影響候選。目標價只提醒、不改燈號。</p>
  </div>`;
 }
 $("focus").addEventListener("click",e=>{
  const g=e.target.closest("[data-fg]");
  if(g){goGroup(g.dataset.fg,true);$("panel").scrollIntoView({behavior:"smooth"});return}
+ const p=e.target.closest("[data-tp]");if(p){openTrade(+p.dataset.tp,true);return}
  const t=e.target.closest("[data-trade]");if(t)openTrade(+t.dataset.trade);
 });
 
@@ -1100,28 +1148,40 @@ function renderSignals(A){
  $("out").innerHTML=`<div style="--c:${COLR[k]}"><h2><i class="dot"></i>${t0}<span class="h2s">${sub}</span></h2>`+
   (list.length?table(list):'<p class="mut" style="margin:12px 0 0">目前沒有標的。</p>')+`</div>`;
 }
+const tpText=x=>x.tpHit
+ ?`已到目標價 ${px(x.tp)}（現價高出 ${((x.q.price/x.tp-1)*100).toFixed(1)}%）：`+(x.tpQty?(x.isFree||!x.cost||x.q.price<=x.cost?`考慮先停利一半，約 ${fq(x.tpQty)} 枚。`:`賣出約 ${fq(x.tpQty)} 枚收回本金，剩下的當淨利幣。`):"沒有填持有數量，無法算出賣出量。")
+ :`目標價 ${px(x.tp)}，還差 ${x.tpGap.toFixed(1)}%`;
 function rowHTML(x){
- const tag=x.fresh?`<span class="tag" style="color:${COLR[x.st]}" title="${new Date(x.since).toLocaleString()}">新・原${ST[x.prev]}・${ago(x.since)}</span>`:"";
+ const tag=(x.fresh?`<span class="tag" style="color:${COLR[x.st]}" title="${new Date(x.since).toLocaleString()}">新・原${ST[x.prev]}・${ago(x.since)}</span>`:"")+(x.tpHit?'<span class="tag" style="color:var(--yel)">到目標價</span>':"");
  const src=x.q.src==="CG"?'<span class="tag mut" title="此檔報價來自 CoinGecko，沒有 24H 量變化">CG</span>':"";
  const btn=x.trade?(x.trade.side==="sell"?"記錄賣出":"記錄買入"):"記錄交易";
  const sub=[x.r.name,...x.tags].filter(Boolean).join("・");
- return `<tr><td class="first"><b>${esc(x.r.sym)}</b>${x.isFree?' <span class="mut">淨</span>':""}${tag}${src}${sub?`<div class="nm">${esc(sub)}</div>`:""}</td>`+
+ return `<tr><td class="first"><b>${esc(x.r.sym)}</b>${x.isFree?' <span class="mut">淨</span>':""}${tag}${src}${sub?`<div class="nm"${x.r.note?` title="${esc(x.r.note.split("|").join("・"))}"`:""}>${esc(sub)}</div>`:""}</td>`+
   `<td class="l mut" data-l="群組">${esc(groupOf(x.r))}</td>`+
   `<td data-l="價格">${px(x.q.price)}</td><td data-l="7日">${pc(x.q.c7)}</td><td data-l="24H">${pc(x.q.c24)}</td>`+
   `<td data-l="換手率">${x.t.toFixed(1)}%</td><td data-l="FDV/龍頭"${x.lead?` title="對比 ${esc(x.lead)}"`:""}>${x.fr==null?"-":x.fr.toFixed(0)+"%"}</td>`+
   `<td data-l="持倉">${x.qty?usd(x.val):"-"}</td><td data-l="損益">${x.isFree?'<span class="mut">淨利幣</span>':x.pnl==null?"-":pc(x.pnl)}</td>`+
-  `<td class="act">${esc(x.why.join("；"))}<br><span class="mut">${esc(x.act)}</span> <button class="g s" data-trade="${x.i}">${btn}</button></td></tr>`;
+  `<td class="act"><div class="actw"><div>${esc(x.why.join("；"))}<br><span class="mut">${esc(x.act)}</span>${x.tp?`<br><span${x.tpHit?' style="color:var(--yel)"':' class="mut"'}>${esc(tpText(x))}</span>`:""}</div><div class="btns">${x.tpQty&&!(x.trade.side==="sell"&&x.trade.qty===x.tpQty)?`<button class="g s" data-tp="${x.i}">記錄停利</button>`:""}<button class="g s" data-trade="${x.i}">${btn}</button></div></div></td></tr>`;
 }
 $("tabs").addEventListener("click",e=>{const t=e.target.closest("[data-tab]");if(!t)return;cfg.ui.tab=t.dataset.tab;save();if(lastA)renderSignals(lastA)});
 $("out").addEventListener("click",e=>{
  const s=e.target.closest("[data-s]");
  if(s){const k=s.dataset.s;sortBy=sortBy.k===k?{k,dir:-sortBy.dir}:{k,dir:k==="sym"||k==="sector"?1:-1};if(lastA)renderSignals(lastA);return}
+ const p=e.target.closest("[data-tp]");if(p){openTrade(+p.dataset.tp,true);return}
  const t=e.target.closest("[data-trade]");if(t)openTrade(+t.dataset.trade);
 });
 
 // ---------- 啟動 ----------
 $("wk").value=cfg.worker;$("ak").value=cfg.key;$("gk").value=cfg.cgKey;$("auto").value=String([0,15,30,60].includes(cfg.auto)?cfg.auto:0);cfg.auto=+$("auto").value;
-view();
+// 同網域就有中繼站（部署在 Cloudflare Pages 時）→ 直接使用，不必填 Worker 網址。
+// 不帶參數查詢，CMC 只回錯誤訊息、不扣 credits；GitHub Pages 上這個路徑是 404，會照常顯示進入頁
+(async()=>{
+ if(!cfg.worker&&!cfg.demo){
+  const base=location.origin+location.pathname.replace(/\/[^/]*$/,"");
+  try{const r=await fetch(base+"/v2/cryptocurrency/quotes/latest",{headers:cmcH()});const j=await r.json();if(j&&j.status){cfg.worker=base;save();$("wk").value=base}}catch(e){}
+ }
+ view();
+})();
 </script>
 </body>
 </html>
